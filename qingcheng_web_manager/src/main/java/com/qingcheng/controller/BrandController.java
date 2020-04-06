@@ -25,6 +25,7 @@ public class BrandController {
     }
     @PostMapping("/findList")  //接受POST请求体中的json数据
     public List<Brand> findList(@RequestBody Map searchMap){
+        //新改动test
         return brandService.findList(searchMap);
     }
 }
