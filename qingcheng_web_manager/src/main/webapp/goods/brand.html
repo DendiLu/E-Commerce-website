@@ -4,7 +4,31 @@
     <meta charset="UTF-8">
     <title>品牌管理</title>
     <link rel="stylesheet" href="../css/elementui.css"/>
-
+    <style>
+        .avatar-uploader .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .avatar-uploader .el-upload:hover {
+            border-color: #409EFF;
+        }
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 178px;
+            height: 178px;
+            line-height: 178px;
+            text-align: center;
+        }
+        .avatar {
+            width: 178px;
+            height: 178px;
+            display: block;
+        }
+    </style>
 </head>
 <body>
 <h1>Hi VUE</h1>
@@ -44,7 +68,7 @@
         <el-table-column
                 label="logo">
             <template slot-scope="hi">
-                <img :src="hi.row.image">
+                <img :src="hi.row.image" width="120px">
             </template>
         </el-table-column>
         <el-table-column
@@ -82,7 +106,15 @@
             <el-input placeholder="品牌排序" v-model="pojo.seq"></el-input>
         </el-form-item>
         <el-form-item  label="品牌logo" >
-            <el-input type="textarea" placeholder="image link" v-model="pojo.image"></el-input>
+            <el-upload
+                    class="avatar-uploader"
+                    action="/upload/native.do"
+                    :show-file-list="false"
+                    :on-success="handleAvatarSuccess"
+                    :before-upload="beforeAvatarUpload">
+                <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
         </el-form-item>
 
         </el-form>
@@ -101,50 +133,53 @@
 <script src="../js/axios.js"></script>
 <script>
     new Vue({
-        el:"#app",
-        data(){
-            return{
-                tableData:[],
-                currentPage:1,
-                size:10,
-                total:10,
-                searchMap:{},
-                dialogVisible:false,
-                pojo:{}
+        el: "#app",
+        data() {
+            return {
+                tableData: [],
+                currentPage: 1,
+                size: 10,
+                total: 10,
+                searchMap: {},
+                dialogVisible: false,
+                pojo: {},
+                imageUrl: ''
             }
         },
-        created(){
+        created() {
             this.fetchData()
         },
-        methods:{
-            fetchData(){
-                axios.post(`/brand/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap)
-                    .then(response=>{
-                        this.tableData=response.data.rows;
-                        this.total=response.data.total
+        methods: {
+            fetchData() {
+                axios.post(`/brand/findPage.do?page=${this.currentPage}&size=${this.size}`, this.searchMap)
+                    .then(response => {
+                        this.tableData = response.data.rows;
+                        this.total = response.data.total
                     })
             },
-            save(){
-                axios.post(`/brand/${this.pojo.id==null?'add':'update'}.do`,this.pojo).then(response=>{
-                    this.dialogVisible=false;
+            save() {
+                this.pojo.image=this.imageUrl;
+                axios.post(`/brand/${this.pojo.id == null ? 'add' : 'update'}.do`, this.pojo).then(response => {
+                    this.dialogVisible = false;
                     this.fetchData();
                 })
             },
-            edit(id){
+            edit(id) {
                 console.log("edit方法执行了");
-                this.dialogVisible=true;
-                axios.get(`/brand/findById.do?id=${id}`).then(response=>{
-                    this.pojo=response.data
+                this.dialogVisible = true;
+                axios.get(`/brand/findById.do?id=${id}`).then(response => {
+                    this.pojo = response.data
+                    this.imageUrl=this.pojo.image;
                 })
             },
-            dele(id){
+            dele(id) {
                 console.log("delete方法执行了");
                 this.$confirm('确定要删除吗?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    axios.get(`/brand/delete.do?id=${id}`).then(response=>{
+                    axios.get(`/brand/delete.do?id=${id}`).then(response => {
                         this.fetchData();
                     })
                     this.$message({
@@ -157,7 +192,24 @@
                         message: '取消删除'
                     });
                 })
+            },
+            handleAvatarSuccess(res, file) {
+                this.imageUrl = file.response;//固定写法 文件具体地址
+            },
+            beforeAvatarUpload(file) {
+                const isJPG = file.type === 'image/jpeg';
+                const isPNG = file.type === 'image/png';
+                const isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG&&!isPNG) {
+                    this.$message.error('上传头像图片只能是 JPG 格式!');
+                }
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 2MB!');
+                }
+                return isJPG && isLt2M;
             }
+
         }
     })
 </script>
