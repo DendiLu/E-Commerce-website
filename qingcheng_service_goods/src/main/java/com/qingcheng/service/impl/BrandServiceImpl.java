@@ -5,6 +5,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.BrandMapper;
 import com.qingcheng.entity.PageResult;
+import com.qingcheng.entity.Result;
 import com.qingcheng.pojo.goods.Brand;
 import com.qingcheng.service.goods.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,36 @@ public class BrandServiceImpl implements BrandService {
         Example example = createExample(searchMap);
         return brandMapper.selectByExample(example);
     }
+
+    @Override
+    public PageResult<Brand> findPage(Map<String, Object> searchMap, int page, int size) {
+        PageHelper.startPage(page,size);
+        Example example = createExample(searchMap);
+        Page<Brand> brandPage = (Page<Brand>) brandMapper.selectByExample(example);
+        return new PageResult<>(brandPage.getTotal(),brandPage.getResult());
+    }
+
+    @Override
+    public Brand findById(Integer id) {
+        return brandMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public void add(Brand brand) {
+        brandMapper.insert(brand);
+    }
+
+    @Override
+    public void update(Brand brand) {
+        brandMapper.updateByPrimaryKeySelective(brand);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        brandMapper.deleteByPrimaryKey(id);
+    }
+
+
     private Example createExample(Map<String, Object> searchMap){
         Example example = new Example(Brand.class);
         Example.Criteria criteria = example.createCriteria();

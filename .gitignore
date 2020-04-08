@@ -8,3 +8,6 @@
 out
 gen
 target
+*/target
+qingcheng_service_goods/src/main/resources/db.properties
+
