@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
-
     <artifactId>qingcheng_service_goods</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>com.qingcheng</groupId>
@@ -29,6 +29,7 @@
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
                 <configuration>
                     <!-- 指定端口 -->
                     <port>9001</port>
@@ -38,6 +39,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
