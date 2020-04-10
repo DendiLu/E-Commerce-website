@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="/js/util.js"></script>
+
 
     <!-- 上传图片框样式，不使用上传组件可以删除此样式 -->
     <style>
@@ -18,9 +20,11 @@
             position: relative;
             overflow: hidden;
         }
+
         .avatar-uploader .el-upload:hover {
             border-color: #409EFF;
         }
+
         .avatar-uploader-icon {
             font-size: 28px;
             color: #8c939d;
@@ -29,6 +33,7 @@
             line-height: 150px;
             text-align: center;
         }
+
         .avatar {
             width: 150px;
             height: 70px;
@@ -53,31 +58,33 @@
         <div class="box">
             <div class="filter-container">
                 <!--查询表单-->
-                <el-form :inline="true" >
-                          <el-form-item label="名称">
-<el-input v-model="searchMap.name" placeholder="名称" class="filter-item" ></el-input></el-form-item>
-          <el-form-item label="选项">
-<el-input v-model="searchMap.options" placeholder="选项" class="filter-item" ></el-input></el-form-item>
+                <el-form :inline="true">
+                    <el-form-item label="名称">
+                        <el-input v-model="searchMap.name" placeholder="名称" class="filter-item"></el-input>
+                    </el-form-item>
+                    <el-form-item label="选项">
+                        <el-input v-model="searchMap.options" placeholder="选项" class="filter-item"></el-input>
+                    </el-form-item>
 
-                <el-button class="dalfBut" @click="fetchData()">查询</el-button>
-                <el-button type="primary"  class="butT" @click="formVisible=true;pojo={}">新增</el-button>
-                    <el-button type="primary"  onclick="location.href='template.html'"  >模板列表</el-button>
+                    <el-button class="dalfBut" @click="fetchData()">查询</el-button>
+                    <el-button type="primary" class="butT" @click="formVisible=true;pojo={templateId:templateId}">新增</el-button>
+                    <el-button type="primary" onclick="location.href='template.html'">模板列表</el-button>
                 </el-form>
             </div>
 
             <el-table :data="tableData" border style="width: 100%">
-                          <el-table-column prop="id" label="id" width="80"></el-table-column>
-          <el-table-column prop="name" label="名称" width="200"></el-table-column>
-          <el-table-column prop="options" label="选项" width="600"></el-table-column>
-          <el-table-column prop="seq" label="排序" width="80"></el-table-column>
+                <el-table-column prop="id" label="id" width="80"></el-table-column>
+                <el-table-column prop="name" label="名称" width="200"></el-table-column>
+                <el-table-column prop="options" label="选项" width="600"></el-table-column>
+                <el-table-column prop="seq" label="排序" width="80"></el-table-column>
 
-                    <el-table-column
-                            label="操作"  >
-                        <template slot-scope="scope">
-                            <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
-                            <el-button @click="dele(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
-                        </template>
-                    </el-table-column>
+                <el-table-column
+                        label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
+                        <el-button @click="dele(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
             <div class="pagination-container">
                 <el-pagination
@@ -93,31 +100,39 @@
             </div>
             <div class="add-form">
                 <!--弹出窗口-->
-                <el-dialog  title="编辑" :visible.sync="formVisible" >
+                <el-dialog title="编辑" :visible.sync="formVisible">
                     <el-form label-width="80px">
-                                <el-form-item label="名称"><el-input v-model="pojo.name"></el-input></el-form-item>
-        <el-form-item label="选项"><el-input v-model="pojo.options"></el-input></el-form-item>
-        <el-form-item label="排序"><el-input v-model="pojo.seq"></el-input></el-form-item>
-        <el-form-item label="模板ID"><el-input v-model="pojo.templateId"></el-input></el-form-item>
+                        <el-form-item label="名称">
+                            <el-input v-model="pojo.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="选项">
+                            <el-input v-model="pojo.options"></el-input>
+                        </el-form-item>
+                        <el-form-item label="排序">
+                            <el-input v-model="pojo.seq"></el-input>
+                        </el-form-item>
+                        <el-form-item label="模板ID">
+                            <el-input v-model="pojo.templateId"></el-input>
+                        </el-form-item>
 
-                            <!-- 图片上传代码 如页面有图片上传功能放开注释 ****
-                            <el-form-item label="图片">
-                                <el-upload
-                                        class="avatar-uploader"
-                                        action="/upload/native.do"
-                                        :show-file-list="false"
-                                        :on-success="handleAvatarSuccess"
-                                        :before-upload="beforeAvatarUpload">
-                                    <img v-if="imageUrl" :src="imageUrl" class="avatar">
-                                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                                </el-upload>
-                            </el-form-item>
-                            -->
+                        <!-- 图片上传代码 如页面有图片上传功能放开注释 ****
+                        <el-form-item label="图片">
+                            <el-upload
+                                    class="avatar-uploader"
+                                    action="/upload/native.do"
+                                    :show-file-list="false"
+                                    :on-success="handleAvatarSuccess"
+                                    :before-upload="beforeAvatarUpload">
+                                <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                            </el-upload>
+                        </el-form-item>
+                        -->
 
-                            <el-form-item>
-                                <el-button type="primary" @click="save()">保存</el-button>
-                                <el-button @click="formVisible = false" >关闭</el-button>
-                            </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="save()">保存</el-button>
+                            <el-button @click="formVisible = false">关闭</el-button>
+                        </el-form-item>
                     </el-form>
                 </el-dialog>
             </div>
@@ -133,9 +148,9 @@
 <script src="/js/elementui.js"></script>
 <script src="/js/util.js"></script>
 <script>
-     new Vue({
+    new Vue({
         el: '#app',
-        data(){
+        data() {
             return {
                 tableData: [],
                 currentPage: 1,
@@ -144,28 +159,29 @@
                 searchMap: {},
                 pojo: {},
                 formVisible: false,
-                imageUrl: ''
+                imageUrl: '',
+                templateId: 0
             }
         },
-        created(){
-            this.searchMap={ templateId: getQueryString('id') }
+        created() {
+            this.searchMap = {templateId: getQueryString('id')}
             this.fetchData();
         },
-        methods:{
-            fetchData (){
-                axios.post(`/para/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
+        methods: {
+            fetchData() {
+                axios.post(`/para/findPage.do?page=${this.currentPage}&size=${this.size}`, this.searchMap).then(response => {
                     this.tableData = response.data.rows;
                     this.total = response.data.total;
                 });
             },
-            save (){
+            save() {
                 // this.pojo.image= this.imageUrl; //如页面有图片上传功能放开注释
-                axios.post(`/para/${this.pojo.id==null?'add':'update'}.do`,this.pojo).then(response => {
-                    this.fetchData (); //刷新列表
-                    this.formVisible = false ;//关闭窗口
+                axios.post(`/para/${this.pojo.id == null ? 'add' : 'update'}.do`, this.pojo).then(response => {
+                    this.fetchData(); //刷新列表
+                    this.formVisible = false;//关闭窗口
                 });
             },
-            edit (id){
+            edit(id) {
                 this.formVisible = true // 打开窗口
                 // 调用查询
                 axios.get(`/para/findById.do?id=${id}`).then(response => {
@@ -173,18 +189,18 @@
                     // this.imageUrl=this.pojo.image //显示图片  如页面有图片上传功能放开注释
                 })
             },
-            dele (id){
+            dele(id) {
                 this.$confirm('确定要删除此记录吗?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
-                }).then( () => {
+                }).then(() => {
                     axios.get(`/para/delete.do?id=${id}`).then(response => {
-                        this.fetchData (); //刷新列表
+                        this.fetchData(); //刷新列表
                     })
                 })
             },
-			/* ****图片上传相关代码  如页面有图片上传功能放开注释 **** 
+            /* ****图片上传相关代码  如页面有图片上传功能放开注释 ****
             handleAvatarSuccess(res, file) {
                 this.imageUrl = file.response;
             },

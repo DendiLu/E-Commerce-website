@@ -60,6 +60,14 @@ public class Spec implements Serializable{
 		this.templateId = templateId;
 	}
 
-
-	
+	@Override
+	public String toString() {
+		return "Spec{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", options='" + options + '\'' +
+				", seq=" + seq +
+				", templateId=" + templateId +
+				'}';
+	}
 }

@@ -51,6 +51,13 @@ public class Template implements Serializable{
 		this.paraNum = paraNum;
 	}
 
-
-	
+	@Override
+	public String toString() {
+		return "Template{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", specNum=" + specNum +
+				", paraNum=" + paraNum +
+				'}';
+	}
 }

@@ -71,7 +71,7 @@
                   <el-switch
                           v-model="scope.row.isShow"
                           active-color="#13ce66"
-                          inactive-color="#ff4949"
+                          inactive-color="#cfcfcf"
                           active-value="1"
                           inactive-value="0">
                   </el-switch>
@@ -83,7 +83,7 @@
                   <el-switch
                           v-model="scope.row.isMenu"
                           active-color="#13ce66"
-                          inactive-color="#ff4949"
+                          inactive-color="#cfcfcf"
                           active-value="1"
                           inactive-value="0">
                   </el-switch>
@@ -103,7 +103,7 @@
               </template>
           </el-table-column>
                 <el-table-column
-                        label="设置"  >
+                        label="设置" width="120" >
                     <template slot-scope="scope">
                         <el-button v-if="parentIds.length<2" @click="queryByParentId(scope.row.id)" size="mini" type="primary" size="small">查看下级</el-button>
 
@@ -121,7 +121,7 @@
 
             <div class="add-form">
                 <!--弹出窗口-->
-                <el-dialog  title="编辑" :visible.sync="formVisible" >
+                <el-dialog  title="编辑" :visible.sync="formVisible" width="40%">
                     <el-form label-width="80px">
                                 <el-form-item label="分类名称"><el-input v-model="pojo.name"></el-input></el-form-item>
 
@@ -129,7 +129,7 @@
             <el-switch
                     v-model="pojo.isShow"
                     active-color="#13ce66"
-                    inactive-color="#ff4949"
+                    inactive-color="#cfcfcf"
                     active-value="1"
                     inactive-value="0">
             </el-switch>
@@ -138,14 +138,14 @@
             <el-switch
                     v-model="pojo.isMenu"
                     active-color="#13ce66"
-                    inactive-color="#ff4949"
+                    inactive-color="#cfcfcf"
                     active-value="1"
                     inactive-value="0">
             </el-switch>
         </el-form-item>
         <el-form-item label="排序"><el-input v-model="pojo.seq"></el-input></el-form-item>
 
-        <el-form-item label="模板ID">
+        <el-form-item label="模板ID">             //↓是否可以搜索
             <el-select v-model="pojo.templateId" filterable placeholder="请选择">
                 <el-option
                         v-for="item in templateList"
@@ -246,17 +246,18 @@
                     })
                 })
             },
+            //查询下一级分类
             queryByParentId(parentId){
                 //做记号
-                this.parentIds.push(this.searchMap.parentId)
-                this.searchMap.parentId =parentId
-                this.fetchData()
+                this.parentIds.push(this.searchMap.parentId);
+                this.searchMap.parentId =parentId;
+                this.fetchData();
             },
             returnQuery(){
                 if(this.parentIds.length>0){
-                    this.searchMap.parentId =this.parentIds[ this.parentIds.length-1 ]
-                    this.parentIds.splice( this.parentIds.length-1,1  ) //删除数组最后一个元素
-                    this.fetchData()
+                    this.searchMap.parentId =this.parentIds.pop();
+                    //this.parentIds.splice( this.parentIds.length-1,1  ); 删除数组最后一个元素
+                    this.fetchData();
                 }
             }
 			/* ****图片上传相关代码  如页面有图片上传功能放开注释 **** 

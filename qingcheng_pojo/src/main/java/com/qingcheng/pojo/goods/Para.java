@@ -24,7 +24,17 @@ public class Para implements Serializable{
 
 	private Integer templateId;//模板ID
 
-	
+	@Override
+	public String toString() {
+		return "Para{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", options='" + options + '\'' +
+				", seq=" + seq +
+				", templateId=" + templateId +
+				'}';
+	}
+
 	public Integer getId() {
 		return id;
 	}

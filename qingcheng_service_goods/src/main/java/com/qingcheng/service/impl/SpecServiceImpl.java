@@ -15,7 +15,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.List;
 import java.util.Map;
 
-@Service(interfaceClass = SpecService.class)
+@Service(interfaceClass = SpecService.class)//使用dubbo需要加上这个属性否则会报错
 public class SpecServiceImpl implements SpecService {
 
     @Autowired
@@ -85,10 +85,7 @@ public class SpecServiceImpl implements SpecService {
     @Transactional
     public void add(Spec spec) {
         specMapper.insert(spec);
-        //将模板中的规格数量+1
-        Template template = templateMapper.selectByPrimaryKey(spec.getTemplateId());
-        template.setSpecNum( template.getSpecNum()+1 );
-        templateMapper.updateByPrimaryKey(template);
+
     }
 
     /**
@@ -105,11 +102,9 @@ public class SpecServiceImpl implements SpecService {
      */
     @Transactional
     public void delete(Integer id) {
-        //将模板中的规格数量减一
+
         Spec spec = specMapper.selectByPrimaryKey(id);
-        Template template = templateMapper.selectByPrimaryKey(spec.getTemplateId());
-        template.setSpecNum( template.getSpecNum()-1 );
-        templateMapper.updateByPrimaryKey(template);
+
 
         specMapper.deleteByPrimaryKey(id);
     }

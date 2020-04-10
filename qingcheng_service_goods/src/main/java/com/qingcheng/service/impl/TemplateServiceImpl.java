@@ -2,8 +2,12 @@ package com.qingcheng.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.qingcheng.dao.ParaMapper;
+import com.qingcheng.dao.SpecMapper;
 import com.qingcheng.dao.TemplateMapper;
 import com.qingcheng.entity.PageResult;
+import com.qingcheng.pojo.goods.Para;
+import com.qingcheng.pojo.goods.Spec;
 import com.qingcheng.pojo.goods.Template;
 import com.qingcheng.service.goods.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,10 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Autowired
     private TemplateMapper templateMapper;
+    @Autowired
+    private SpecMapper specMapper;
+    @Autowired
+    private ParaMapper paraMapper;
 
     /**
      * 返回全部记录
@@ -61,6 +69,10 @@ public class TemplateServiceImpl implements TemplateService {
         Page<Template> templates = (Page<Template>) templateMapper.selectByExample(example);
         return new PageResult<Template>(templates.getTotal(),templates.getResult());
     }
+
+    /**
+     * 查询每个template的specNum和paraNum,都为零(没有设置过
+     */
 
     /**
      * 根据Id查询

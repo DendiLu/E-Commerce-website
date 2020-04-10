@@ -212,7 +212,7 @@
                     this.$message.error('上传头像图片只能是 JPG或PNG 格式!');
                 }
                 if (!isLt2M) {
-                    this.$message.error('上传头像图片大小不能超过 2MB!');
+                    this.$message.error('上传头像图片大小不能超过 8MB!');
                 }
                 return (isJPG || isPNG)&& isLt2M ;
             }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>album管理</title>
+    <title>相册图片列表</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- 引入样式 -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
@@ -18,11 +18,9 @@
             position: relative;
             overflow: hidden;
         }
-
         .avatar-uploader .el-upload:hover {
             border-color: #409EFF;
         }
-
         .avatar-uploader-icon {
             font-size: 28px;
             color: #8c939d;
@@ -31,14 +29,19 @@
             line-height: 150px;
             text-align: center;
         }
-
         .avatar {
             width: 150px;
-
+            height: 70px;
             display: block;
+
+        }
+        .buttons{
+            float: right;
         }
 
     </style>
+
+
 </head>
 <body class="hold-transition">
 <div id="app">
@@ -55,41 +58,29 @@
     <div class="app-container">
         <div class="box">
             <div class="filter-container">
-                <!--查询表单-->
-                <el-form :inline="true" >
-                    <el-form-item label="相册名称">
-                        <el-input v-model="searchMap.title" placeholder="相册名称" class="filter-item" style="width: 200px"></el-input>
-                    </el-form-item>
-
-
-                    <el-button class="dalfBut" @click="fetchData()" >查询</el-button>
-                    <el-button type="primary" class="butT" @click="formVisible=true;pojo={}">新增</el-button>
-                </el-form>
+                <el-tag>相册ID: {{pojo.id}} &nbsp; &nbsp;&nbsp;&nbsp;相册名称: {{pojo.title}}</el-tag>
+                <div class="buttons">
+                <el-button type="primary"  class="butT" @click="formVisible=true">新增</el-button>
+                <el-button type="primary"  class="butT" @click="returnParentPage">返回</el-button>
+                </div>
             </div>
+            <HR style="border:3px;double:#987cb9" width="100%" color=#987cb9 SIZE=3>
+            <br>
+            <el-row >
+                <el-col :span="6" v-for="(item,index) in imageList"  >
+                    <el-card :body-style="{ padding: '20px'}" shadow="hover">
+                        <img :src="item.url" class="image" width="300px" >
+                        <div style="padding: 14px;">
 
-            <el-table :data="tableData" border style="width: 60%">
-                <el-table-column prop="id" label="编号" width="80"></el-table-column>
-                <el-table-column prop="title" label="相册名称" width="80"></el-table-column>
-                <el-table-column  label="相册封面" width="310">
-                    <template slot-scope="scope">
-                        <img :src="scope.row.image" alt="相册封面" height="200">
-                    </template>
-                </el-table-column>
-                <el-table-column  label="设置" width="120">
-                    <template slot-scope="scope">
-                        <el-button @click="list(scope.row.id)" size="mini" type="primary" size="small">图片列表</el-button>
-                    </template>
-                </el-table-column>
+                            <div class="bottom clearfix">
+                                <span>{{item.url}}</span>
+                                <el-button @click="dele(item.url)" size="mini" type="danger" size="small">删除</el-button>
+                            </div>
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
 
-
-                <el-table-column
-                        label="操作" width="150">
-                    <template slot-scope="scope">
-                        <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
-                        <el-button @click="dele(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
             <div class="pagination-container">
                 <el-pagination
                         class="pagiantion"
@@ -104,33 +95,22 @@
             </div>
             <div class="add-form">
                 <!--弹出窗口-->
-                <el-dialog title="编辑" :visible.sync="formVisible">
+                <el-dialog  title="编辑" :visible.sync="formVisible" >
                     <el-form label-width="80px">
-                        <el-form-item label="相册名称">
-                            <el-input v-model="pojo.title"></el-input>
-                        </el-form-item>
-                        <el-form-item label="相册封面">
-                            <el-input v-model="pojo.image"></el-input>
-                        </el-form-item>
-
-
-
-                        <el-form-item label="封面">
+                        <el-form-item label="图片">
                             <el-upload
                                     class="avatar-uploader"
                                     action="/upload/native.do"
-                                    :show-file-list="true"
+                                    :show-file-list="false"
                                     :on-success="handleAvatarSuccess"
                                     :before-upload="beforeAvatarUpload">
-                                <img v-if="imageUrl" :src="imageUrl" class="avatar" >
+                                <img v-if="imageUrl" :src="imageUrl" class="avatar">
                                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                             </el-upload>
                         </el-form-item>
-
-
                         <el-form-item>
                             <el-button type="primary" @click="save()">保存</el-button>
-                            <el-button @click="formVisible = false">关闭</el-button>
+                            <el-button @click="formVisible = false" >关闭</el-button>
                         </el-form-item>
                     </el-form>
                 </el-dialog>
@@ -139,16 +119,16 @@
         </div>
     </div>
 
-
 </div>
 </body>
 <script src="/js/vue.js"></script>
 <script src="/js/axios.js"></script>
 <script src="/js/elementui.js"></script>
+<script src="/js/util.js"></script>
 <script>
     new Vue({
         el: '#app',
-        data() {
+        data(){
             return {
                 tableData: [],
                 currentPage: 1,
@@ -157,51 +137,65 @@
                 searchMap: {},
                 pojo: {},
                 formVisible: false,
-                imageUrl: ''
+                imageUrl: '',
+                imageList:[]
             }
         },
-        created() {
-            this.fetchData();
+        created(){
+            let id=getQueryString("id");
+            this.fetchData(id);
         },
-        methods: {
-            fetchData() {
-                axios.post(`/album/findPage.do?page=${this.currentPage}&size=${this.size}`, this.searchMap).then(response => {
-                    this.tableData = response.data.rows;
-                    this.total = response.data.total;
+        methods:{
+            fetchData (id){
+                // 调用查询
+                axios.get(`/album/findById.do?id=${id}`).then(response => {
+                    this.pojo=response.data;
+                    this.imageList = JSON.parse( this.pojo.imageItems);
+                    if (!this.imageList){
+                        this.imageList=[];
+                    }
+                    console.log("imageList: "+this.imageList);
+                })
+            },
+            save (){
+                this.imageList.push({url:this.imageUrl});  //追加
+
+                this.pojo.imageItems= JSON.stringify(this.imageList); //保存到实体
+                console.log(this.pojo.imageItems);
+                axios.post(`/album/update.do`,this.pojo).then(response => {  //保存到数据库
+                    this.formVisible = false ;//关闭窗口
                 });
             },
-            save() {
-                 this.pojo.image= this.imageUrl;
-                axios.post(`/album/${this.pojo.id == null ? 'add' : 'update'}.do`, this.pojo).then(response => {
-                    this.fetchData(); //刷新列表
-                    this.formVisible = false;//关闭窗口
-                });
-            },
-            edit(id) {
+            edit (id){
                 this.formVisible = true // 打开窗口
                 // 调用查询
                 axios.get(`/album/findById.do?id=${id}`).then(response => {
-                    this.pojo = response.data;
-                     this.imageUrl=this.pojo.image //显示图片  如页面有图片上传功能放开注释
+                    this.imageList = JSON.parse( response.data.imageItems);
                 })
             },
-            dele(id) {
+            list (id){  //图片列表
+                location.href=`album_list.html?id=${id}`;
+            },
+            dele (url){
                 this.$confirm('确定要删除此记录吗?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
-                }).then(() => {
-                    axios.get(`/album/delete.do?id=${id}`).then(response => {
-                        this.fetchData(); //刷新列表
-                    })
+                }).then( () => {
+                    for(let i=0;i<this.imageList.length;i++){
+                        if(this.imageList[i].url==url){
+                            this.imageList.splice(i,1);
+                            break;
+                        }
+                    }
+                    this.pojo.imageItems= JSON.stringify(this.imageList); //保存到实体
+                    axios.post(`/album/update.do`,this.pojo).then(response => {  //保存到数据库
+                        this.formVisible = false ;//关闭窗口
+                    });
                 })
             },
-            list(id){
-                location.href=`album_list.html?id=${id}`;
-            },
-
+            //* ****图片上传相关代码  如页面有图片上传功能放开注释 ****
             handleAvatarSuccess(res, file) {
-                console.log(file.response);
                 this.imageUrl = file.response;
             },
             beforeAvatarUpload(file) {
@@ -216,6 +210,9 @@
                     this.$message.error('上传头像图片大小不能超过 8MB!');
                 }
                 return (isJPG || isPNG)&& isLt2M ;
+            },
+            returnParentPage(){
+                location.href="album.html";
             }
         }
     })
