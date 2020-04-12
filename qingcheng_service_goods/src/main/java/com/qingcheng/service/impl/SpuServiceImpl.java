@@ -4,10 +4,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.qingcheng.dao.CategoryBrandMapper;
-import com.qingcheng.dao.CategoryMapper;
-import com.qingcheng.dao.SkuMapper;
-import com.qingcheng.dao.SpuMapper;
+import com.qingcheng.dao.*;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.*;
 import com.qingcheng.service.goods.SpuService;
@@ -16,10 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service(interfaceClass = SpuService.class)//加入事物后被多个接口代理,加入此注解指定接口
 public class SpuServiceImpl implements SpuService {
@@ -32,6 +27,8 @@ public class SpuServiceImpl implements SpuService {
     private CategoryMapper categoryMapper;
     @Autowired
     private IdWorker idWorker;
+    @Autowired
+    private GoodsLogMapper goodsLogMapper;
 
     /**
      * 返回全部记录
@@ -247,6 +244,19 @@ public class SpuServiceImpl implements SpuService {
         spu.setIsMarketable("0");
         spuMapper.updateByPrimaryKeySelective(spu);
         //记录商品日志
+        GoodsLog goodsLog = goodsLogMapper.selectByPrimaryKey(id);
+        Date currentDate = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String logTime = simpleDateFormat.format(currentDate);
+        if(goodsLog==null){
+            goodsLog = new GoodsLog();
+            goodsLog.setLogInfo(logTime+" 商品下架 /n");
+            goodsLogMapper.insertSelective(goodsLog);
+        }else {
+            String logInfo = goodsLog.getLogInfo()+logTime+" 商品下架 /n";
+            goodsLog.setLogInfo(logInfo);
+            goodsLogMapper.updateByPrimaryKeySelective(goodsLog);
+        }
     }
 
 
@@ -259,13 +269,26 @@ public class SpuServiceImpl implements SpuService {
     public void upShelf(String id) {
         //修改状态
         Spu spu = spuMapper.selectByPrimaryKey(id);
-        //查询审核状态
+        //查询是否通过审核 0通过 1未通过
         if(!"1".equals(spu.getStatus())){
             throw new RuntimeException("此商品未通过审核");
         }
         spu.setIsMarketable("1");
         spuMapper.updateByPrimaryKeySelective(spu);
         //记录商品日志
+        GoodsLog goodsLog = goodsLogMapper.selectByPrimaryKey(id);
+        Date currentDate = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String logTime = simpleDateFormat.format(currentDate);
+        if(goodsLog==null){
+            goodsLog = new GoodsLog();
+            goodsLog.setLogInfo(logTime+" 商品上架 /n");
+            goodsLogMapper.insertSelective(goodsLog);
+        }else {
+            String logInfo = goodsLog.getLogInfo()+logTime+" 商品上架 /n";
+            goodsLog.setLogInfo(logInfo);
+            goodsLogMapper.updateByPrimaryKeySelective(goodsLog);
+        }
 
     }
 
@@ -286,6 +309,21 @@ public class SpuServiceImpl implements SpuService {
         criteria.andEqualTo("isMarketable","0");
         int i = spuMapper.updateByExampleSelective(spu, example);
         //记录商品日志
+        for(String id:ids){
+            GoodsLog goodsLog = goodsLogMapper.selectByPrimaryKey(id);
+            Date currentDate = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String logTime = simpleDateFormat.format(currentDate);
+            if(goodsLog==null){
+                goodsLog = new GoodsLog();
+                goodsLog.setLogInfo(logTime+" 商品上架 /n");
+                goodsLogMapper.insertSelective(goodsLog);
+            }else {
+                String logInfo = goodsLog.getLogInfo()+logTime+" 商品上架 /n";
+                goodsLog.setLogInfo(logInfo);
+                goodsLogMapper.updateByPrimaryKeySelective(goodsLog);
+            }
+        }
 
         return i;
     }
@@ -306,8 +344,82 @@ public class SpuServiceImpl implements SpuService {
         criteria.andEqualTo("isMarketable","1");
         int i = spuMapper.updateByExampleSelective(spu, example);
         //记录商品日志
+        for(String id:ids){
+            GoodsLog goodsLog = goodsLogMapper.selectByPrimaryKey(id);
+            Date currentDate = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String logTime = simpleDateFormat.format(currentDate);
+            if(goodsLog==null){
+                goodsLog = new GoodsLog();
+                goodsLog.setLogInfo(logTime+" 商品下架 /n");
+                goodsLogMapper.insertSelective(goodsLog);
+            }else {
+                String logInfo = goodsLog.getLogInfo()+logTime+" 商品下架 /n";
+                goodsLog.setLogInfo(logInfo);
+                goodsLogMapper.updateByPrimaryKeySelective(goodsLog);
+            }
+        }
 
         return i;
+    }
+
+    /**
+     * 逻辑删除商品,数据库is_delete字段设为1
+     * @param ids
+     */
+    public int delete(String[] ids){
+        int count = 0;
+        if (ids!=null&&ids.length>0){
+            for(String id:ids){
+                Spu spu = spuMapper.selectByPrimaryKey(id);
+                spu.setIsDelete("1");
+                int i = spuMapper.updateByPrimaryKeySelective(spu);
+                count+=i;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 从回收站回复逻辑删除的商品,数据库is_delete字段设为0
+     * @param ids
+     * @return
+     */
+    public int recycle(String[] ids){
+        int count = 0;
+        if (ids!=null&&ids.length>0){
+            for(String id:ids){
+                Spu spu = spuMapper.selectByPrimaryKey(id);
+                spu.setIsDelete("0");
+                int i = spuMapper.updateByPrimaryKeySelective(spu);
+                count+=i;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 返回回收站中已删除的商品(逻辑删除)
+     * @return
+     */
+    public List<Goods> findDeletedGoods(){
+        List<Goods> goodsList = new ArrayList<>();
+        Example example = new Example(Spu.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("isDelete","1");
+        List<Spu> spus = spuMapper.selectByExample(example);
+        spus.forEach(spu->{
+            String spuId = spu.getId();
+            Example example1 = new Example(Sku.class);
+            Example.Criteria criteria1 = example1.createCriteria();
+            criteria1.andEqualTo("spuId",spuId);
+            List<Sku> skuList = skuMapper.selectByExample(example1);
+            Goods goods = new Goods();
+            goods.setSkuList(skuList);
+            goods.setSpu(spu);
+            goodsList.add(goods);
+        });
+        return goodsList;
     }
 
     /**
