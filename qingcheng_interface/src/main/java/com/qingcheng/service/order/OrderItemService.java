@@ -32,4 +32,5 @@ public interface OrderItemService {
 
     public void delete(String id);
 
+    public List<OrderItem> findByOrderId(String id);
 }

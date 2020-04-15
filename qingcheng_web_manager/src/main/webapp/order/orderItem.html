@@ -179,11 +179,13 @@
 <script src="/js/vue.js"></script>
 <script src="/js/axios.js"></script>
 <script src="/js/elementui.js"></script>
+<script src="/js/util.js"></script>
 <script>
      new Vue({
         el: '#app',
         data(){
             return {
+                orderId: 0,
                 tableData: [],
                 currentPage: 1,
                 total: 10,
@@ -195,13 +197,15 @@
             }
         },
         created(){
-            this.fetchData();
+            let id=getQueryString("id");
+            this.orderId=id;
+            console.log(id);
+            this.fetchData(id);
         },
         methods:{
-            fetchData (){
-                axios.post(`/orderItem/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
-                    this.tableData = response.data.rows;
-                    this.total = response.data.total;
+            fetchData (id){
+                axios.get(`/orderItem/findByOrderId.do?id=${id}`,this.searchMap).then(response => {
+                    this.tableData = response.data;
                 });
             },
             save (){

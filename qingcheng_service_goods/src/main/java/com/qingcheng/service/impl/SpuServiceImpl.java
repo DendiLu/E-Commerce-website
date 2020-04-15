@@ -400,7 +400,7 @@ public class SpuServiceImpl implements SpuService {
 
     /**
      * 返回回收站中已删除的商品(逻辑删除)
-     * @return
+     * @return List<Goods>
      */
     public List<Goods> findDeletedGoods(){
         List<Goods> goodsList = new ArrayList<>();

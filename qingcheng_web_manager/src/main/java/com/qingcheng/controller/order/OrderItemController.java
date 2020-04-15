@@ -5,6 +5,7 @@ import com.qingcheng.entity.PageResult;
 import com.qingcheng.entity.Result;
 import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.service.order.OrderItemService;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -39,6 +40,11 @@ public class OrderItemController {
     @GetMapping("/findById")
     public OrderItem findById(String id){
         return orderItemService.findById(id);
+    }
+
+    @GetMapping("/findByOrderId")
+    public List<OrderItem> findByOrderId(String id){
+        return orderItemService.findByOrderId(id);
     }
 
 

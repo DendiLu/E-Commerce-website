@@ -95,6 +95,15 @@ public class OrderItemServiceImpl implements OrderItemService {
         orderItemMapper.deleteByPrimaryKey(id);
     }
 
+
+    public List<OrderItem> findByOrderId(String id) {
+        Example example = new Example(OrderItem.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("orderId",id);
+        List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
+        return orderItems;
+    }
+
     /**
      * 构建查询条件
      * @param searchMap

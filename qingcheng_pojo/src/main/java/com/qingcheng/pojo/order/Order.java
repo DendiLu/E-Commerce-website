@@ -2,6 +2,8 @@ package com.qingcheng.pojo.order;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.List;
+
 /**
  * order实体类
  * @author Administrator
@@ -13,7 +15,7 @@ public class Order implements Serializable{
 	@Id
 	private String id;//订单id
 
-
+	private List<OrderItem> orderItemList;
 	
 
 	private Integer totalNum;//数量合计
@@ -68,7 +70,48 @@ public class Order implements Serializable{
 
 	private String isDelete;//是否删除
 
-	
+	@Override
+	public String toString() {
+		return "Order{" +
+				"id='" + id + '\'' +
+				", orderItemList=" + orderItemList +
+				", totalNum=" + totalNum +
+				", totalMoney=" + totalMoney +
+				", preMoney=" + preMoney +
+				", postFee=" + postFee +
+				", payMoney=" + payMoney +
+				", payType='" + payType + '\'' +
+				", createTime=" + createTime +
+				", updateTime=" + updateTime +
+				", payTime=" + payTime +
+				", consignTime=" + consignTime +
+				", endTime=" + endTime +
+				", closeTime=" + closeTime +
+				", shippingName='" + shippingName + '\'' +
+				", shippingCode='" + shippingCode + '\'' +
+				", username='" + username + '\'' +
+				", buyerMessage='" + buyerMessage + '\'' +
+				", buyerRate='" + buyerRate + '\'' +
+				", receiverContact='" + receiverContact + '\'' +
+				", receiverMobile='" + receiverMobile + '\'' +
+				", receiverAddress='" + receiverAddress + '\'' +
+				", sourceType='" + sourceType + '\'' +
+				", transactionId='" + transactionId + '\'' +
+				", orderStatus='" + orderStatus + '\'' +
+				", payStatus='" + payStatus + '\'' +
+				", consignStatus='" + consignStatus + '\'' +
+				", isDelete='" + isDelete + '\'' +
+				'}';
+	}
+
+	public List<OrderItem> getOrderItemList() {
+		return orderItemList;
+	}
+
+	public void setOrderItemList(List<OrderItem> orderItemList) {
+		this.orderItemList = orderItemList;
+	}
+
 	public String getId() {
 		return id;
 	}

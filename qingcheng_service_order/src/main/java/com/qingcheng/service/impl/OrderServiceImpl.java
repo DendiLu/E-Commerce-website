@@ -2,9 +2,11 @@ package com.qingcheng.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.qingcheng.dao.OrderItemMapper;
 import com.qingcheng.dao.OrderMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.order.Order;
+import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.service.order.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
@@ -17,6 +19,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private OrderItemMapper orderItemMapper;
 
     /**
      * 返回全部记录
@@ -68,7 +72,15 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     public Order findById(String id) {
-        return orderMapper.selectByPrimaryKey(id);
+        Order order = orderMapper.selectByPrimaryKey(id);
+        if(order!=null){
+            Example example = new Example(OrderItem.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo("orderId",id);
+            List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
+            order.setOrderItemList(orderItems);
+        }
+        return order;
     }
 
     /**
@@ -106,7 +118,7 @@ public class OrderServiceImpl implements OrderService {
         if(searchMap!=null){
             // 订单id
             if(searchMap.get("id")!=null && !"".equals(searchMap.get("id"))){
-                criteria.andLike("id","%"+searchMap.get("id")+"%");
+                criteria.andEqualTo("id",searchMap.get("id"));
             }
             // 支付类型，1、在线支付、0 货到付款
             if(searchMap.get("payType")!=null && !"".equals(searchMap.get("payType"))){
