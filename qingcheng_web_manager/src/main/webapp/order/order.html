@@ -149,8 +149,7 @@
             </div>
 
             <el-table :data="tableData" border style="width: 100%" show-overflow-tooltip="true"
-                      @select="onSelection"
-                      @select-all="onSelectionAll">
+                      @selection-change="handleSelectionChange">
 
                 <el-table-column
                         type="selection"
@@ -423,23 +422,10 @@
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-            onSelection(selection, row) {
-                if (this.selections.indexOf(row.id) == -1) {
-                    this.selections.push(row.id);
-                }
+            handleSelectionChange(val){
+                this.selections=val;
             },
-            showAll() {
-                alert(this.selections);
-            },
-            onSelectionAll(selection) {
-                if (selection.length) {
-                    selection.forEach(row => {
-                        if (this.selections.indexOf(row.id) == -1) {
-                            this.selections.push(row.id);
-                        }
-                    })
-                }
-            },
+
             sendOut() {
                 location.href = `sendOut.html?ids=${this.selections}`
             }

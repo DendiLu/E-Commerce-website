@@ -35,4 +35,6 @@ public interface OrderService {
 
     public int updateBatch(List<Order> orders);
 
+    public void handleOrderTimeout();
+
 }

@@ -2,15 +2,18 @@ package com.qingcheng.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.qingcheng.dao.OrderConfigMapper;
 import com.qingcheng.dao.OrderItemMapper;
 import com.qingcheng.dao.OrderMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.order.Order;
+import com.qingcheng.pojo.order.OrderConfig;
 import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.service.order.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -119,22 +122,50 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.deleteByPrimaryKey(id);
     }
 
-
+    /**
+     * 批量发货 更改订单状态发货状态和发货时间，快递类型和单号由前台获取
+     * @param orders
+     * @return
+     */
     public int updateBatch(List<Order> orders) {
         int count=0;
-        for(Order order:orders){
-            if(order.getConsignStatus()==null||order.getShippingCode()==null){
-                throw new RuntimeException("物流类型和单号不能为空");
+        if(orders!=null&&orders.size()>0) {
+            for (Order order : orders) {
+                if (order.getConsignStatus() == null || order.getShippingCode() == null) {
+                    throw new RuntimeException("物流类型和单号不能为空");
+                }
+                order.setOrderStatus("3");//订单状态已发货
+
+                order.setConsignStatus("2"); //发货状态已发货
+
+                order.setConsignTime(new Date());//发货时间
+                count += orderMapper.updateByPrimaryKeySelective(order);
             }
-            order.setOrderStatus("3");//订单状态已发货
-
-            order.setConsignStatus("2"); //发货状态已发货
-
-            order.setConsignTime(new Date());//发货时间
-            count+=orderMapper.updateByPrimaryKeySelective(order);
         }
         return count;
     }
+    @Autowired
+    OrderConfigMapper orderConfigMapper;
+    /**
+     * 超时订单
+     */
+    public void handleOrderTimeout() {
+        OrderConfig orderConfig = orderConfigMapper.selectByPrimaryKey(1);
+        Integer orderTimeout = orderConfig.getOrderTimeout();//60分钟 普通订单
+        LocalDateTime localDateTime = LocalDateTime.now().minusMinutes(orderTimeout);
+        Example example = new Example(Order.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andLessThan("createTime",localDateTime);
+        criteria.andEqualTo("orderStatus",0);
+        criteria.andEqualTo("isDeleted",0);
+        List<Order> orders = orderMapper.selectByExample(example);
+        for(Order order:orders){
+            order.setOrderStatus("4");
+            order.setCloseTime(new Date());//关闭日期
+            orderMapper.updateByPrimaryKeySelective(order);
+        }
+    }
+
 
     /**
      * 构建查询条件
