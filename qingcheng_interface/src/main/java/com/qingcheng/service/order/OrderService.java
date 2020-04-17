@@ -9,6 +9,7 @@ import java.util.*;
  */
 public interface OrderService {
 
+    public List<Order> findOrders(String[] ids);
 
     public List<Order> findAll();
 
@@ -31,5 +32,7 @@ public interface OrderService {
 
 
     public void delete(String id);
+
+    public int updateBatch(List<Order> orders);
 
 }

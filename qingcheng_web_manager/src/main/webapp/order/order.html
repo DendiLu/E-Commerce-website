@@ -144,50 +144,96 @@
                     </el-form-item>
 
                     <el-button class="dalfBut" @click="fetchData()">查询</el-button>
-                    <el-button type="primary" class="butT" @click="formVisible=true;pojo={}">新增</el-button>
+                    <el-button type="primary" class="butT" @click="formVisible=true">新增</el-button>
                 </el-form>
             </div>
 
-            <el-table :data="tableData" border style="width: 100%">
-                <el-table-column prop="id" label="订单id" width="80"></el-table-column>
-                <el-table-column prop="totalNum" label="数量合计" width="80"></el-table-column>
-                <el-table-column prop="totalMoney" label="金额合计" width="80"></el-table-column>
-                <el-table-column prop="preMoney" label="优惠金额" width="80"></el-table-column>
-                <el-table-column prop="postFee" label="邮费" width="80"></el-table-column>
-                <el-table-column prop="payMoney" label="实付金额" width="80"></el-table-column>
-                <el-table-column prop="payType" label="支付类型，1、在线支付、0 货到付款" width="80"></el-table-column>
-                <el-table-column prop="createTime" label="订单创建时间" width="80"></el-table-column>
-                <el-table-column prop="updateTime" label="订单更新时间" width="80"></el-table-column>
-                <el-table-column prop="payTime" label="付款时间" width="80"></el-table-column>
-                <el-table-column prop="consignTime" label="发货时间" width="80"></el-table-column>
-                <el-table-column prop="endTime" label="交易完成时间" width="80"></el-table-column>
-                <el-table-column prop="closeTime" label="交易关闭时间" width="80"></el-table-column>
-                <el-table-column prop="shippingName" label="物流名称" width="80"></el-table-column>
-                <el-table-column prop="shippingCode" label="物流单号" width="80"></el-table-column>
-                <el-table-column prop="username" label="用户名称" width="80"></el-table-column>
-                <el-table-column prop="buyerMessage" label="买家留言" width="80"></el-table-column>
-                <el-table-column prop="buyerRate" label="是否评价" width="80"></el-table-column>
-                <el-table-column prop="receiverContact" label="收货人" width="80"></el-table-column>
-                <el-table-column prop="receiverMobile" label="收货人手机" width="80"></el-table-column>
-                <el-table-column prop="receiverAddress" label="收货人地址" width="80"></el-table-column>
-                <el-table-column prop="sourceType" label="订单来源：1:web，2：app，3：微信公众号，4：微信小程序  5 H5手机页面"
-                                 width="80"></el-table-column>
-                <el-table-column prop="transactionId" label="交易流水号" width="80"></el-table-column>
-                <el-table-column prop="orderStatus" label="订单状态" width="80"></el-table-column>
-                <el-table-column prop="payStatus" label="支付状态" width="80"></el-table-column>
-                <el-table-column prop="consignStatus" label="发货状态" width="80"></el-table-column>
-                <el-table-column label="订单详情" width="120"><template slot-scope="scope">
-                    <el-button @click="detail(scope.row.id)" size="mini" type="primary" size="small">查看明细
-                    </el-button>
-                </template></el-table-column>
+            <el-table :data="tableData" border style="width: 100%" show-overflow-tooltip="true"
+                      @select="onSelection"
+                      @select-all="onSelectionAll">
 
                 <el-table-column
-                        label="操作">
+                        type="selection"
+                        width="55"></el-table-column>
+                <el-table-column prop="id" label="订单id" width="80"></el-table-column>
+                <!--                <el-table-column prop="totalNum" label="数量合计" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="totalMoney" label="金额合计" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="preMoney" label="优惠金额" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="postFee" label="邮费" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="payMoney" label="实付金额" width="80"></el-table-column>-->
+                <el-table-column prop="createTime" label="订单创建时间" width="80"></el-table-column>
+                <!--                <el-table-column prop="updateTime" label="订单更新时间" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="payTime" label="付款时间" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="consignTime" label="发货时间" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="endTime" label="交易完成时间" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="closeTime" label="交易关闭时间" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="shippingName" label="物流名称" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="shippingCode" label="物流单号" width="80"></el-table-column>-->
+                <el-table-column prop="username" label="用户名称" width="80"></el-table-column>
+                <el-table-column prop="buyerMessage" label="买家留言" width="180"></el-table-column>
+                <!--                <el-table-column prop="buyerRate" label="是否评价" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="receiverContact" label="收货人" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="receiverMobile" label="收货人手机" width="80"></el-table-column>-->
+                <!--                <el-table-column prop="receiverAddress" label="收货人地址" width="80"></el-table-column>-->
+                <!--                ：1:web，2：app，3：微信公众号，4：微信小程序  5 H5手机页面-->
+
+                <el-table-column label="订单来源" width="80">
+                    　　　　　　　　
                     <template slot-scope="scope">
+                        　　　　　　　　　　<span v-if="scope.row.sourceType== 1">web</span>
+                        　　　　　　　　　　<span v-else-if="scope.row.sourceType== 2">app</span>
+                        　　　　　　　　　　<span v-else-if="scope.row.sourceType== 3">微信公众号</span>
+                        　　　　　　　　　　<span v-else-if="scope.row.sourceType== 4">微信小程序</span>
+                        <span v-else>未知</span>
+                        　　　　　　　　
+                    </template>
+                </el-table-column>
+                <!--                <el-table-column prop="transactionId" label="交易流水号" width="80"></el-table-column>-->
+                <el-table-column label="订单状态" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.orderStatus== 0">待付款</span>
+                        　　　　　　　　　　<span v-else-if="scope.row.orderStatus== 1">待发货</span>
+                        　　　　　　　　　　<span v-else-if="scope.row.orderStatus== 2">已发货</span>
+                    </template>
+                </el-table-column>
+                <!--    支付类型       0、货到付款 1、微信支付,2、支付宝 3、银联支付-->
+                <el-table-column label="支付类型" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.payType==0">货到付款</span>
+                        <span v-else-if="scope.row.payType==1">微信支付</span>
+                        <span v-else-if="scope.row.payType==2">支付宝支付</span>
+                        <span v-else-if="scope.row.payType==3">银联支付</span>
+                        <span v-else>未知</span>
+                    </template>
+                </el-table-column>
+                <!--                0未支付 1已支付 2已退款-->
+                <el-table-column label="支付状态" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.payStatus"><span v-if="scope.row.payStatus==0">未支付</span>
+                        <span v-else-if="scope.row.payStatus==1">已支付</span>
+                        <span v-else-if="scope.row.payStatus==2">已退款</span></span>
+                        <span v-else-if="scope.row.payStatus==null">未知</span></span>
+                        <span v-else>未知</span>
+                    </template>
+                </el-table-column>
+
+                <el-table-column
+                        align="center" width="400">
+                    <template slot="header" slot-scope="scope">
+                        <el-button size="small" @click="sendOut"   plain>批量发货</el-button>
+                        <el-button size="small" plain>拆分订单</el-button>
+                        <el-button size="small" plain>导出订单</el-button>
+                        <el-button size="small" plain>打印发货单</el-button>
+                    </template>
+                    <template slot-scope="scope" style="margin: 50px">
+                        <el-button @click="detail(scope.row.id)" size="mini" type="primary" size="small">查看明细
+                        </el-button>
                         <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
                         <el-button @click="dele(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
                     </template>
                 </el-table-column>
+
+
             </el-table>
             <div class="pagination-container">
                 <el-pagination
@@ -323,6 +369,7 @@
         el: '#app',
         data() {
             return {
+                selections: [],
                 tableData: [],
                 currentPage: 1,
                 total: 10,
@@ -370,9 +417,33 @@
                 })
             },
             detail(id) {
-                console.log("id: "+id);
+                console.log("id: " + id);
                 location.href = `orderItem.html?id=${id}`
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            onSelection(selection, row) {
+                if (this.selections.indexOf(row.id) == -1) {
+                    this.selections.push(row.id);
+                }
+            },
+            showAll() {
+                alert(this.selections);
+            },
+            onSelectionAll(selection) {
+                if (selection.length) {
+                    selection.forEach(row => {
+                        if (this.selections.indexOf(row.id) == -1) {
+                            this.selections.push(row.id);
+                        }
+                    })
+                }
+            },
+            sendOut() {
+                location.href = `sendOut.html?ids=${this.selections}`
             }
+
 
             /* ****图片上传相关代码  如页面有图片上传功能放开注释 ****
             handleAvatarSuccess(res, file) {

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+</head>
+<body>
+<div id="app" width="100%">
+    <div class="content-header">
+        <h1>管理<small>order管理</small></h1>
+        <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>管理</el-breadcrumb-item>
+            <el-breadcrumb-item>order批量发货</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+    <div class="app-container">
+        <div class="box">
+    <el-table :data="tableData" border  show-overflow-tooltip="true" style="width: 100%"
+              @selection-change="handleSelectionChange">
+        <el-table-column
+                type="selection"
+                width="55"></el-table-column>
+        <el-table-column
+                prop="id"
+                label="订单编号"
+                width="180">
+        </el-table-column>
+        <el-table-column prop="receiverContact" label="收货人" width="80"></el-table-column>
+        <el-table-column prop="receiverMobile" label="收货人手机" width="80"></el-table-column>
+        <el-table-column prop="receiverAddress" label="收货人地址" width="80"></el-table-column>
+        <el-table-column  label="配送方式" width="200">
+            <template slot-scope="scope">
+                <el-select v-model="scope.row.shippingName" @change="" placeholder="请选择">
+                    <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </template>
+        </el-table-column>
+        <el-table-column label="物流单号" id="templateColum"  width="700">
+            <template slot-scope="scope">
+                <el-col span="22" style="margin-right: 30px">
+                    <el-input v-model="scope.row.shippingCode"  placehold="输入运单号并仔细核对" clearable></el-input>
+                </el-col>
+            </template>
+        </el-table-column>
+    </el-table><el-footer>
+            <el-row >
+                <el-button @click="submit">提交发货</el-button>
+                <el-button @click="fetchData">清除数据</el-button>
+            </el-row>
+
+        </el-footer>
+        </div>
+
+    </div>
+
+</div>
+
+
+</body>
+<script src="/js/vue.js"></script>
+<script src="/js/axios.js"></script>
+<script src="/js/elementui.js"></script>
+<script src="/js/util.js"></script>
+<script>
+    new Vue({
+        el:'#app',
+        data(){
+            return {
+                ids: [],
+                tableData: [],
+                selections:[],
+                currentPage: 1,
+                total: 10,
+                size: 10,
+                searchMap: {},
+                pojo: {},
+                formVisible: false,
+                options: [{
+                    value: '韵达快递',
+                    label: '韵达快递'
+                }, {
+                    value: '中通快递',
+                    label: '中通快递'
+                }, {
+                    value: '顺丰快递',
+                    label: '顺丰快递'
+                }, {
+                    value: 'EMS',
+                    label: 'EMS'
+                }, {
+                    value: '邮政小包',
+                    label: '邮政小包'
+                }, {
+                    value: '京东物流',
+                    label: '京东物流'
+                }
+                ]
+            }
+        },
+        created(){
+            this.ids=getQueryString("ids");
+            this.fetchData();
+        },
+        methods:{
+            fetchData(){
+                axios.get(`/order/getSendOutList.do?ids=${this.ids}`).then(response=>{
+                    this.tableData=response.data;
+                })
+            },
+            submit(){
+                axios.post(`/order/batchSendOut.do?`,this.selections).then(response=>{
+                    alert(response.data.message);
+                    this.fetchData();
+                })
+            },
+
+            onSelectionAll(selection) {
+                if (selection.length) {
+                    selection.forEach(row => {
+                        if (this.selections.indexOf(row) == -1) {
+                            this.selections.push(row);
+                        }
+                    })
+                }
+            },
+            handleSelectionChange(val) {
+                this.selections=val;
+            }
+
+        }
+    })
+</script>
+</html>

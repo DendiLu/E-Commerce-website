@@ -11,6 +11,8 @@ import com.qingcheng.service.order.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +42,16 @@ public class OrderServiceImpl implements OrderService {
         PageHelper.startPage(page,size);
         Page<Order> orders = (Page<Order>) orderMapper.selectAll();
         return new PageResult<Order>(orders.getTotal(),orders.getResult());
+    }
+    /**
+     * 根据ids批量查询订单
+     */
+    public List<Order> findOrders(String[] ids){
+        Example example = new Example(Order.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", Arrays.asList(ids));
+        return orderMapper.selectByExample(example);
+
     }
 
     /**
@@ -105,6 +117,23 @@ public class OrderServiceImpl implements OrderService {
      */
     public void delete(String id) {
         orderMapper.deleteByPrimaryKey(id);
+    }
+
+
+    public int updateBatch(List<Order> orders) {
+        int count=0;
+        for(Order order:orders){
+            if(order.getConsignStatus()==null||order.getShippingCode()==null){
+                throw new RuntimeException("物流类型和单号不能为空");
+            }
+            order.setOrderStatus("3");//订单状态已发货
+
+            order.setConsignStatus("2"); //发货状态已发货
+
+            order.setConsignTime(new Date());//发货时间
+            count+=orderMapper.updateByPrimaryKeySelective(order);
+        }
+        return count;
     }
 
     /**

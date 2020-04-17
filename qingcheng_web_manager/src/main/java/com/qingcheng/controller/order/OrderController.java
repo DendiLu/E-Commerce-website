@@ -5,7 +5,9 @@ import com.qingcheng.entity.PageResult;
 import com.qingcheng.entity.Result;
 import com.qingcheng.pojo.order.Order;
 import com.qingcheng.service.order.OrderService;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
 
@@ -58,6 +60,19 @@ public class OrderController {
     public Result delete(String id){
         orderService.delete(id);
         return new Result();
+    }
+
+    @GetMapping("/getSendOutList")
+    public List<Order> sendOutList(String[] ids){
+       return orderService.findOrders(ids);
+    }
+
+    @PostMapping("/batchSendOut")
+    public Result batchSendOut(@RequestBody List<Order> orders){
+        int i = orderService.updateBatch(orders);
+        Result result= new Result();
+        result.setMessage(i+" 个订单已发货");
+        return result;
     }
 
 }
