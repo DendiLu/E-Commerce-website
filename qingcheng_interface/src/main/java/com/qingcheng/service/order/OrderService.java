@@ -35,6 +35,9 @@ public interface OrderService {
 
     public int updateBatch(List<Order> orders);
 
+    /*
+        定时任务自动处理超时订单
+     */
     public void handleOrderTimeout();
 
 }

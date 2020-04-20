@@ -10,6 +10,8 @@ import java.util.*;
 public interface MenuService {
 
 
+    public List<Map> findAllMenu();
+
     public List<Menu> findAll();
 
 

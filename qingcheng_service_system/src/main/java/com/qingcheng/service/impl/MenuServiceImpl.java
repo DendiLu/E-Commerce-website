@@ -9,6 +9,8 @@ import com.qingcheng.service.system.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +24,32 @@ public class MenuServiceImpl implements MenuService {
      * 返回全部记录
      * @return
      */
+    public List<Map> findAllMenu() {
+        List<Menu> menuList = findAll();//查询全部菜单列表
+        return findMenuListByParentId(menuList,"0");//一级菜单列表
+    }
+
+    @Override
     public List<Menu> findAll() {
         return menuMapper.selectAll();
+    }
+
+    private List<Map> findMenuListByParentId(List<Menu> menuList, String
+            parentId){
+        List<Map> mapList=new ArrayList<>();
+        for(Menu menu:menuList){
+//循环一级菜单
+            if(menu.getParentId().equals(parentId)){
+                Map map=new HashMap();
+                map.put("path",menu.getId());
+                map.put("title",menu.getName());
+                map.put("icon",menu.getIcon());
+                map.put("linkUrl",menu.getUrl());
+                map.put("children",findMenuListByParentId(menuList,menu.getId()));
+                mapList.add(map);
+            }
+        }
+        return mapList;
     }
 
     /**
@@ -37,6 +63,7 @@ public class MenuServiceImpl implements MenuService {
         Page<Menu> menus = (Page<Menu>) menuMapper.selectAll();
         return new PageResult<Menu>(menus.getTotal(),menus.getResult());
     }
+
 
     /**
      * 条件查询

@@ -16,6 +16,7 @@ public class AdminController {
     @Reference
     private AdminService adminService;
 
+
     @GetMapping("/findAll")
     public List<Admin> findAll(){
         return adminService.findAll();
