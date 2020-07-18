@@ -3,20 +3,27 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.AdminMapper;
+import com.qingcheng.dao.AdminRoleMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.system.Admin;
+import com.qingcheng.pojo.system.AdminRole;
 import com.qingcheng.service.system.AdminService;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service(interfaceClass = AdminService.class, protocol = "dubbo")
 public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private AdminMapper adminMapper;
+    @Autowired
+    private AdminRoleMapper adminRoleMapper;
 
     /**
      * 返回全部记录
@@ -36,6 +43,38 @@ public class AdminServiceImpl implements AdminService {
         PageHelper.startPage(page,size);
         Page<Admin> admins = (Page<Admin>) adminMapper.selectAll();
         return new PageResult<Admin>(admins.getTotal(),admins.getResult());
+    }
+
+    @Override
+    public void updatePassword(String username, String newPassword) {
+        Map map = new HashMap();
+        map.put("loginName",username);
+        Example example = createExample(map);
+        List<Admin> admins = adminMapper.selectByExample(example);
+        if(admins.size()==0){
+            throw new RuntimeException("根据用户名查询为空");
+        }else {
+            Admin admin = admins.get(0);
+            String gensalt = BCrypt.gensalt();
+            String hashpw = BCrypt.hashpw(newPassword, gensalt);
+            admin.setPassword(hashpw);
+            adminMapper.updateByPrimaryKeySelective(admin);
+        }
+    }
+
+    @Override
+    public void updateName(String oldName, String newName) {
+        Map map = new HashMap();
+        map.put("loginName",oldName);
+        Example example = createExample(map);
+        List<Admin> admins = adminMapper.selectByExample(example);
+        if(admins.size()==0){
+            throw new RuntimeException("根据用户名查询为空");
+        }else {
+            Admin admin = admins.get(0);
+            admin.setLoginName(newName);
+            adminMapper.updateByPrimaryKeySelective(admin);
+        }
     }
 
     /**
@@ -72,11 +111,24 @@ public class AdminServiceImpl implements AdminService {
     }
 
     /**
-     * 新增
-     * @param admin
+     * 将多个权限添加给管理员，添加进tb_admin_role表
+     * @param admin 管理员
+     * @param roleIds 复数个权限id
      */
-    public void add(Admin admin) {
+    @Transactional
+    public void add(Admin admin, List<Integer> roleIds) {
+        Integer adminId = admin.getId();
+        String gensalt = BCrypt.gensalt();
+        String hashpw = BCrypt.hashpw(admin.getPassword(), gensalt);
+        admin.setPassword(hashpw);
         adminMapper.insert(admin);
+        int i = admin.getId();
+        for(Integer id: roleIds){
+            AdminRole adminRole = new AdminRole();
+            adminRole.setAdminId(i);
+            adminRole.setRoleId(id);
+            adminRoleMapper.insert(adminRole);
+        }
     }
 
     /**

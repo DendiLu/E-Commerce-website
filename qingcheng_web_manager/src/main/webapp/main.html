@@ -42,7 +42,10 @@
                             </div>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item divided>
-                                    <span style="display:block;">修改密码</span>
+                                    <span style="display:block;" @click="updateName">修改用户名</span>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided>
+                                    <span style="display:block;" @click="updatePassword">修改密码</span>
                                 </el-dropdown-item>
                                 <el-dropdown-item divided>
                                         <span style="display:block;" @click="logout">退出</span>
@@ -185,6 +188,57 @@
                 axios.post('/logout').then(response=>{
                     location.href='login.html';
                 })
+            },
+            updateName(){
+
+                this.$prompt('请输入新用户名', '修改账户', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then(({ value }) => {
+                        axios.get(`/admin/updateAdmin.do?name=${value}`).then(response=>{
+                            if(response.data.code==0){
+                            this.$message({
+                                type: 'success',
+                                message: response.data.message
+                            });}else {
+                                this.$message({
+                                    type: 'error',
+                                    message: response.data.message
+                                });
+                            }
+                        })
+
+                    }
+                ).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '取消修改'
+                    });
+                });
+
+            },
+            updatePassword(){
+
+                    this.$prompt('请输入新密码', '修改账户', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        inputType: 'password'
+                    }).then(({ value }) => {
+                        axios.get(`/admin/updateAdmin.do?password=${value}`).then(response=>{
+                            this.$message({
+                                type: 'success',
+                                message: response.data.message
+                            });
+                        })
+
+                        }
+                    ).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '取消修改'
+                        });
+                    });
+
             },
             // 选择顶部导航菜单，联动左侧菜单
             handleSelect(key) {

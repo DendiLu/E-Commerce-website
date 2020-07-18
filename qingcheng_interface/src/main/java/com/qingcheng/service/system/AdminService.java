@@ -24,10 +24,12 @@ public interface AdminService {
 
     public Admin findById(Integer id);
 
-    public void add(Admin admin);
+    public void add(Admin admin,List<Integer> ids);
+
+    public void updatePassword(String username,String newPassword);
 
 
-    public void update(Admin admin);
+    public void updateName(String oldName,String newName);
 
 
     public void delete(Integer id);

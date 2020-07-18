@@ -5,7 +5,7 @@
     <title>admin管理</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- 引入样式 -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="../css/style.css">
 
@@ -18,9 +18,11 @@
             position: relative;
             overflow: hidden;
         }
+
         .avatar-uploader .el-upload:hover {
             border-color: #409EFF;
         }
+
         .avatar-uploader-icon {
             font-size: 28px;
             color: #8c939d;
@@ -29,6 +31,7 @@
             line-height: 150px;
             text-align: center;
         }
+
         .avatar {
             width: 150px;
             height: 70px;
@@ -38,6 +41,7 @@
     </style>
 </head>
 <body class="hold-transition">
+<button @click="fetchData">加载</button>
 <div id="app">
 
     <div class="content-header">
@@ -51,73 +55,74 @@
 
     <div class="app-container">
         <div class="box">
-            <div class="filter-container">
-                <!--查询表单-->
-                <el-form :inline="true" >
-                          <el-form-item label="用户名">
-<el-input v-model="searchMap.loginName" placeholder="用户名" class="filter-item" ></el-input></el-form-item>
-          <el-form-item label="密码">
-<el-input v-model="searchMap.password" placeholder="密码" class="filter-item" ></el-input></el-form-item>
-          <el-form-item label="状态">
-<el-input v-model="searchMap.status" placeholder="状态" class="filter-item" ></el-input></el-form-item>
+            <el-form :model="admin" label-width="80px" ref="roleForm">
+                <el-form-item label="成员名称" prop="loginName">
+                    <el-input v-model="admin.loginName"></el-input>
+                </el-form-item>
+<!--                <el-form-item label="成员姓名">-->
+<!--                    <el-input v-model=""></el-input>-->
+<!--                </el-form-item>-->
+<!--                <el-form-item label="邮箱地址">-->
+<!--                    <el-input v-model="" show-password></el-input>-->
+<!--                </el-form-item>-->
+                <el-form-item label="账户角色">
+                    <el-select v-model="roleIds" placeholder="请选择角色" multiple>
+                        <el-option
+                                v-for="item in roleList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+<!--                <el-form-item label="登录密码" >-->
+<!--                    <el-input id="pswd1" v-model="" placeholeder="请设置密码" show-password></el-input>-->
+<!--                </el-form-item>-->
+                <el-form-item label="确认密码" prop="password">
+                    <el-input id="pswd2" placeholeder="两次密码保持一致" v-model="admin.password"></el-input>
+                </el-form-item>
+                <el-form-item label="账号状态" style="display: none">
+                    <el-input id="status" v-model="admin.status" value="1"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+                    <el-button @click="resetForm('roleForm')">重置</el-button>
+                </el-form-item>
+            </el-form>
 
-                <el-button class="dalfBut" @click="fetchData()">查询</el-button>
-                <el-button type="primary"  class="butT" @click="formVisible=true;pojo={}">新增</el-button>
-                </el-form>
-            </div>
 
-            <el-table :data="tableData" border style="width: 100%">
-                          <el-table-column prop="id" label="id" width="80"></el-table-column>
-          <el-table-column prop="loginName" label="用户名" width="80"></el-table-column>
-          <el-table-column prop="password" label="密码" width="80"></el-table-column>
-          <el-table-column prop="status" label="状态" width="80"></el-table-column>
-
-                    <el-table-column
-                            label="操作"  >
-                        <template slot-scope="scope">
-                            <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
-                            <el-button @click="dele(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
-                        </template>
-                    </el-table-column>
-            </el-table>
-            <div class="pagination-container">
-                <el-pagination
-                        class="pagiantion"
-                        @size-change="fetchData"
-                        @current-change="fetchData"
-                        :current-page.sync="currentPage"
-                        :page-sizes="[10, 20, 30, 40]"
-                        :page-size="size"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total="total">
-                </el-pagination>
-            </div>
             <div class="add-form">
                 <!--弹出窗口-->
-                <el-dialog  title="编辑" :visible.sync="formVisible" >
+                <el-dialog title="编辑" :visible.sync="formVisible">
                     <el-form label-width="80px">
-                                <el-form-item label="用户名"><el-input v-model="pojo.loginName"></el-input></el-form-item>
-        <el-form-item label="密码"><el-input v-model="pojo.password"></el-input></el-form-item>
-        <el-form-item label="状态"><el-input v-model="pojo.status"></el-input></el-form-item>
+                        <el-form-item label="用户名">
+                            <el-input v-model="pojo.loginName"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码">
+                            <el-input v-model="pojo.password"></el-input>
+                        </el-form-item>
+                        <el-form-item label="状态">
+                            <el-input v-model="pojo.status"></el-input>
+                        </el-form-item>
 
-                            <!-- 图片上传代码 如页面有图片上传功能放开注释 ****
-                            <el-form-item label="图片">
-                                <el-upload
-                                        class="avatar-uploader"
-                                        action="/upload/native.do"
-                                        :show-file-list="false"
-                                        :on-success="handleAvatarSuccess"
-                                        :before-upload="beforeAvatarUpload">
-                                    <img v-if="imageUrl" :src="imageUrl" class="avatar">
-                                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                                </el-upload>
-                            </el-form-item>
-                            -->
+                        <!-- 图片上传代码 如页面有图片上传功能放开注释 ****
+                        <el-form-item label="图片">
+                            <el-upload
+                                    class="avatar-uploader"
+                                    action="/upload/native.do"
+                                    :show-file-list="false"
+                                    :on-success="handleAvatarSuccess"
+                                    :before-upload="beforeAvatarUpload">
+                                <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                            </el-upload>
+                        </el-form-item>
+                        -->
 
-                            <el-form-item>
-                                <el-button type="primary" @click="save()">保存</el-button>
-                                <el-button @click="formVisible = false" >关闭</el-button>
-                            </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="save()">保存</el-button>
+                            <el-button @click="formVisible = false">关闭</el-button>
+                        </el-form-item>
                     </el-form>
                 </el-dialog>
             </div>
@@ -132,57 +137,50 @@
 <script src="/js/axios.js"></script>
 <script src="/js/elementui.js"></script>
 <script>
-     new Vue({
+    new Vue({
         el: '#app',
-        data(){
+        data() {
             return {
                 tableData: [],
-                currentPage: 1,
-                total: 10,
-                size: 10,
-                searchMap: {},
                 pojo: {},
                 formVisible: false,
-                imageUrl: ''
+                imageUrl: '',
+                admin: {},
+                roleIds: [],
+                templateList: [],
+                roleList: []
             }
         },
-        created(){
+        created() {
             this.fetchData();
         },
-        methods:{
-            fetchData (){
-                axios.post(`/admin/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
-                    this.tableData = response.data.rows;
-                    this.total = response.data.total;
+        methods: {
+            fetchData() {
+                axios.get(`/role/findAll.do`).then(response => {
+                    this.roleList = response.data;
+                    this.admin.status='1';
                 });
             },
-            save (){
-                // this.pojo.image= this.imageUrl; //如页面有图片上传功能放开注释
-                axios.post(`/admin/${this.pojo.id==null?'add':'update'}.do`,this.pojo).then(response => {
-                    this.fetchData (); //刷新列表
-                    this.formVisible = false ;//关闭窗口
-                });
-            },
-            edit (id){
-                this.formVisible = true // 打开窗口
-                // 调用查询
-                axios.get(`/admin/findById.do?id=${id}`).then(response => {
-                    this.pojo = response.data;
-                    // this.imageUrl=this.pojo.image //显示图片  如页面有图片上传功能放开注释
+            submitForm() {
+                axios.post(`/admin/addAdmin.do`,{admin: this.admin,roleIds: this.roleIds}).then(response => {
+                    if(response.data.code==0){
+                        this.$message({
+                            message: response.data.message,
+                            type: 'success'
+                        });
+                    }else {
+                        this.$message({
+                            message: response.data.message,
+                            type: 'error'
+                        });
+                    }
                 })
             },
-            dele (id){
-                this.$confirm('确定要删除此记录吗?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then( () => {
-                    axios.get(`/admin/delete.do?id=${id}`).then(response => {
-                        this.fetchData (); //刷新列表
-                    })
-                })
-            },
-			/* ****图片上传相关代码  如页面有图片上传功能放开注释 **** 
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+                this.admin.status=1;
+            }
+            /* ****图片上传相关代码  如页面有图片上传功能放开注释 ****
             handleAvatarSuccess(res, file) {
                 this.imageUrl = file.response;
             },

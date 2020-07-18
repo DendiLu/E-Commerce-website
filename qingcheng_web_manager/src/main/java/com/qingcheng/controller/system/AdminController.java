@@ -1,10 +1,13 @@
 package com.qingcheng.controller.system;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.entity.Result;
 import com.qingcheng.pojo.system.Admin;
+import com.qingcheng.pojo.system.AdminRoleIds;
 import com.qingcheng.service.system.AdminService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -43,16 +46,27 @@ public class AdminController {
     }
 
 
-    @PostMapping("/add")
-    public Result add(@RequestBody Admin admin){
-        adminService.add(admin);
+    @PostMapping("/addAdmin")
+    public Result add(@RequestBody AdminRoleIds adminRoleIds){
+        Admin admin = adminRoleIds.getAdmin();
+        List<Integer> roleIds = adminRoleIds.getRoleIds();
+        adminService.add(admin,roleIds);
         return new Result();
     }
 
-    @PostMapping("/update")
-    public Result update(@RequestBody Admin admin){
-        adminService.update(admin);
-        return new Result();
+    @GetMapping("/updateAdmin")
+    public Result updateAdmin(String name,String password){
+        String currName = SecurityContextHolder.getContext().getAuthentication().getName();
+        System.out.println("name: "+name+", password: "+password);
+        if (name!=null&&!"".equals(name)){
+            adminService.updateName(currName,name);
+            return new Result(0,"成功修改用户名");
+        }else if(password!=null&&!"".equals(password)){
+            adminService.updatePassword(currName,password);
+            return new Result(0,"成功修改密码");
+        }else {
+            return new Result(1,"未能成功修改，请检查你的输入");
+        }
     }
 
     @GetMapping("/delete")
