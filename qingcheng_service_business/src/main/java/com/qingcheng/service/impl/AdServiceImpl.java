@@ -9,11 +9,30 @@ import com.qingcheng.service.business.AdService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class AdServiceImpl implements AdService {
+    /**
+     * 根据网页中的位置查询符合条件的广告
+     * @param position
+     * @return
+     */
+    @Override
+    public List<Ad> findByPosition(String position) {
+        Example example = new Example(Ad.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("position",position);
+        Date now = new Date();
+        criteria.andLessThanOrEqualTo("startTime",now); //开始时间小于等于当前时间
+        criteria.andGreaterThan("endTime", now);  //截止时间大于当前时间
+        criteria.andEqualTo("status",1);
+        List<Ad> ads = adMapper.selectByExample(example);
+        return ads;
+
+    }
 
     @Autowired
     private AdMapper adMapper;

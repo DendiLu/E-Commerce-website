@@ -8,6 +8,7 @@ import java.util.*;
  * ad业务逻辑层
  */
 public interface AdService {
+    public List<Ad> findByPosition(String position);
 
 
     public List<Ad> findAll();
