@@ -14,3 +14,4 @@ qingcheng_web_manager/src/main/webapp/img/*
 qingcheng_common_web/src/main/resources/applicationContext-config.xml
 */db.properties
 qingcheng_common_web/src/main/resources/applicationContext-json.xml
+/qingcheng_web_manager/src/main/test/

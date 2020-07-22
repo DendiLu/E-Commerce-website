@@ -41,7 +41,6 @@
     </style>
 </head>
 <body class="hold-transition">
-<button @click="fetchData">加载</button>
 <div id="app">
 
     <div class="content-header">
@@ -57,14 +56,16 @@
         <div class="box">
             <el-form :model="admin" label-width="80px" ref="roleForm">
                 <el-form-item label="成员名称" prop="loginName">
-                    <el-input v-model="admin.loginName"></el-input>
+                    <el-col :span="12">
+                        <el-input v-model="admin.loginName"></el-input>
+                    </el-col>
                 </el-form-item>
-<!--                <el-form-item label="成员姓名">-->
-<!--                    <el-input v-model=""></el-input>-->
-<!--                </el-form-item>-->
-<!--                <el-form-item label="邮箱地址">-->
-<!--                    <el-input v-model="" show-password></el-input>-->
-<!--                </el-form-item>-->
+                <!--                <el-form-item label="成员姓名">-->
+                <!--                    <el-input v-model=""></el-input>-->
+                <!--                </el-form-item>-->
+                <!--                <el-form-item label="邮箱地址">-->
+                <!--                    <el-input v-model="" show-password></el-input>-->
+                <!--                </el-form-item>-->
                 <el-form-item label="账户角色">
                     <el-select v-model="roleIds" placeholder="请选择角色" multiple>
                         <el-option
@@ -75,11 +76,13 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-<!--                <el-form-item label="登录密码" >-->
-<!--                    <el-input id="pswd1" v-model="" placeholeder="请设置密码" show-password></el-input>-->
-<!--                </el-form-item>-->
+                <!--                <el-form-item label="登录密码" >-->
+                <!--                    <el-input id="pswd1" v-model="" placeholeder="请设置密码" show-password></el-input>-->
+                <!--                </el-form-item>-->
                 <el-form-item label="确认密码" prop="password">
-                    <el-input id="pswd2" placeholeder="两次密码保持一致" v-model="admin.password"></el-input>
+                    <el-col :span="12">
+                        <el-input id="pswd2" placeholeder="两次密码保持一致" v-model="admin.password"></el-input>
+                    </el-col>
                 </el-form-item>
                 <el-form-item label="账号状态" style="display: none">
                     <el-input id="status" v-model="admin.status" value="1"></el-input>
@@ -158,17 +161,17 @@
             fetchData() {
                 axios.get(`/role/findAll.do`).then(response => {
                     this.roleList = response.data;
-                    this.admin.status='1';
+                    this.admin.status = '1';
                 });
             },
             submitForm() {
-                axios.post(`/admin/addAdmin.do`,{admin: this.admin,roleIds: this.roleIds}).then(response => {
-                    if(response.data.code==0){
+                axios.post(`/admin/addAdmin.do`, {admin: this.admin, roleIds: this.roleIds}).then(response => {
+                    if (response.data.code == 0) {
                         this.$message({
                             message: response.data.message,
                             type: 'success'
                         });
-                    }else {
+                    } else {
                         this.$message({
                             message: response.data.message,
                             type: 'error'
@@ -178,7 +181,7 @@
             },
             resetForm(formName) {
                 this.$refs[formName].resetFields();
-                this.admin.status=1;
+                this.admin.status = 1;
             }
             /* ****图片上传相关代码  如页面有图片上传功能放开注释 ****
             handleAvatarSuccess(res, file) {

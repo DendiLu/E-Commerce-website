@@ -7,6 +7,7 @@ import com.qingcheng.entity.Result;
 import com.qingcheng.pojo.system.Admin;
 import com.qingcheng.pojo.system.AdminRoleIds;
 import com.qingcheng.service.system.AdminService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +48,7 @@ public class AdminController {
 
 
     @PostMapping("/addAdmin")
+    @PreAuthorize("hasAuthority('config')")
     public Result add(@RequestBody AdminRoleIds adminRoleIds){
         Admin admin = adminRoleIds.getAdmin();
         List<Integer> roleIds = adminRoleIds.getRoleIds();
@@ -55,6 +57,7 @@ public class AdminController {
     }
 
     @GetMapping("/updateAdmin")
+    @PreAuthorize("hasAnyAuthority()")
     public Result updateAdmin(String name,String password){
         String currName = SecurityContextHolder.getContext().getAuthentication().getName();
         System.out.println("name: "+name+", password: "+password);

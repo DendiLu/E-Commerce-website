@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns="http://www.springframework.org/schema/security"
-             xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
     <http pattern="/login.html" security="none"></http>
@@ -10,9 +11,12 @@
     <http pattern="/img/**" security="none"></http>
     <http pattern="/*.ico" security="none"></http>
 
-    <http>
-        <intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')" />
-<!--        配置登陆成功处理器后default-target-url配置失效，需手动跳转到指定页面-->
+    <http use-expressions="true" auto-config="true">
+        <intercept-url pattern="/main.html" access="hasAnyAuthority()"/>
+        <intercept-url pattern="/admin/*.do" access="hasAuthority('config')"/>
+        <intercept-url pattern="/system/admin.html" access="hasAuthority('config')"/>
+        <intercept-url pattern="/system/loginLog.html" access="hasAnyAuthority()"/>
+        <!--        配置登陆成功处理器后default-target-url配置失效，需手动跳转到指定页面-->
         <form-login login-page="/login.html"
                     default-target-url="/main.html"
                     authentication-success-handler-ref="loginHandler"
@@ -20,6 +24,10 @@
         <logout/>
         <csrf disabled="true"></csrf>
         <headers>
+            <!--            iframe下加载页面-->
+            <!--    DENY：浏览器拒绝当前页面加载任何Frame页面
+                    SAMEORIGIN：frame页面的地址只能为同源域名下的页面
+                    ALLOW-FROM：origin为允许frame加载的页面地址。-->
             <frame-options policy="SAMEORIGIN"></frame-options>
         </headers>
     </http>
@@ -30,8 +38,12 @@
         </authentication-provider>
     </authentication-manager>
 
+    <!--    开启基于方法的访问权限控制-->
+    <global-method-security pre-post-annotations="enabled"/>
+
 
     <beans:bean id="userDetailsService" class="com.qingcheng.controller.system.UserDetailsServiceImpl"></beans:bean>
-    <beans:bean id="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></beans:bean>
+    <beans:bean id="bcryptEncoder"
+                class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></beans:bean>
     <beans:bean id="loginHandler" class="com.qingcheng.controller.system.AuthenticationSuccessHandlerImpl"></beans:bean>
 </beans:beans>

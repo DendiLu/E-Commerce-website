@@ -3,8 +3,11 @@ package com.qingcheng.controller.system;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.entity.Result;
+import com.qingcheng.pojo.system.AdminRoleIds;
 import com.qingcheng.pojo.system.Role;
+import com.qingcheng.service.system.AdminRoleService;
 import com.qingcheng.service.system.RoleService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -15,6 +18,8 @@ public class RoleController {
 
     @Reference
     private RoleService roleService;
+    @Reference
+    private AdminRoleService adminRoleService;
 
     @GetMapping("/findAll")
     public List<Role> findAll(){
@@ -37,8 +42,8 @@ public class RoleController {
     }
 
     @GetMapping("/findById")
-    public Role findById(Integer id){
-        return roleService.findById(id);
+    public List<Integer> findById(Integer id) throws Exception {
+        return adminRoleService.findById(id).getRoleIds();
     }
 
 
