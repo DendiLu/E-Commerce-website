@@ -9,6 +9,8 @@ import com.qingcheng.service.goods.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,36 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+
+    @Override
+    public List<Map> finCategoryTree() {
+        Example example = new Example(Category.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("isShow",1); //该字段要为1才展示
+        example.setOrderByClause("seq"); //对返回的结果按指定字段排序 “seq desc"降序
+        List<Category> categoryList = categoryMapper.selectByExample(example);
+        return findByParentId(categoryList,0);
+    }
+
+    /**
+     * 每个map是一个菜单项，含项名name和下级菜单id menus两个key
+     * @param categoryList 查到的所有展示菜单项
+     * @param parentId 上级菜单id
+     * @return
+     */
+    private List<Map> findByParentId(List<Category> categoryList,Integer parentId){
+        List<Map> resultList = new ArrayList<>();
+        for(Category category : categoryList){
+            if(category.getParentId().equals(parentId)){
+                Map map = new HashMap();
+                map.put("name", category.getName());
+                map.put("menus",findByParentId(categoryList,category.getId())); //menus为该菜单项的下级菜单
+                resultList.add(map);
+            }
+        }
+        return resultList;
+    }
 
     /**
      * 返回全部记录

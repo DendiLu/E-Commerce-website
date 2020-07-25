@@ -8,7 +8,11 @@ import java.util.*;
  * category业务逻辑层
  */
 public interface CategoryService {
-
+    /**
+     * 查找前台首页导航条内容，有一级、二级、三级分类
+     * @return
+     */
+    public List<Map> finCategoryTree();
 
     public List<Category> findAll();
 
