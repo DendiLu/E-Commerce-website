@@ -9,6 +9,15 @@ import java.util.*;
  */
 public interface SkuService {
 
+    public void saveAllPriceToRedis();
+
+    public void savePriceToRedisById(String id,Integer price);
+
+
+    public void deletePriceFromRedis(String skuId);
+
+    public Integer findPrice(String skuId);
+
 
     public List<Sku> findAll();
 

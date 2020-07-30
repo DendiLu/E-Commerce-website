@@ -12,7 +12,12 @@ public interface CategoryService {
      * 查找前台首页导航条内容，有一级、二级、三级分类
      * @return
      */
-    public List<Map> finCategoryTree();
+    public List<Map> findCategoryTree();
+
+    /**
+     * 将首页树状导航栏条目存进redis
+     */
+    public void saveCategoryTreeToRedis();
 
     public List<Category> findAll();
 

@@ -7,9 +7,12 @@ import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.*;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.*;
+import com.qingcheng.service.goods.SkuService;
 import com.qingcheng.service.goods.SpuService;
+import com.qingcheng.util.CacheKey;
 import com.qingcheng.util.IdWorker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
@@ -29,6 +32,8 @@ public class SpuServiceImpl implements SpuService {
     private IdWorker idWorker;
     @Autowired
     private GoodsLogMapper goodsLogMapper;
+    @Autowired
+    private SkuService skuService;
 
     /**
      * 返回全部记录
@@ -174,11 +179,11 @@ public class SpuServiceImpl implements SpuService {
             sku.setCategoryName(category.getName());
             sku.setCommentNum(0);
             sku.setSaleNum(0);
-            if (sku.getImage() != null && !"".equals(sku.getImage()))
-                sku.setImage(sku.getImage());
-            if (sku.getImages() != null && !"".equals(sku.getImages()))
-                sku.setImage(sku.getImages());
+
             skuMapper.insert(sku);
+            //重新将商品加载到redis
+            skuService.savePriceToRedisById(sku.getId(),sku.getPrice());
+
         }
         //建立分类与品牌关联
         CategoryBrand categoryBrand = new CategoryBrand();
@@ -234,17 +239,17 @@ public class SpuServiceImpl implements SpuService {
     /**
      * 商品下架
      *
-     * @param id
+     * @param spuId
      */
     @Override
-    public void downShelf(String id) {
+    public void downShelf(String spuId) {
         //修改状态
         Spu spu = new Spu();
-        spu.setId(id);
+        spu.setId(spuId);
         spu.setIsMarketable("0");
         spuMapper.updateByPrimaryKeySelective(spu);
         //记录商品日志
-        GoodsLog goodsLog = goodsLogMapper.selectByPrimaryKey(id);
+        GoodsLog goodsLog = goodsLogMapper.selectByPrimaryKey(spuId);
         Date currentDate = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String logTime = simpleDateFormat.format(currentDate);
@@ -363,16 +368,29 @@ public class SpuServiceImpl implements SpuService {
         return i;
     }
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     /**
      * 逻辑删除商品,数据库is_delete字段设为1
-     * @param ids
+     * @param spuIds
      */
-    public int delete(String[] ids){
+    public int delete(String[] spuIds){
         int count = 0;
-        if (ids!=null&&ids.length>0){
-            for(String id:ids){
+        if (spuIds !=null&& spuIds.length>0){
+            for(String id: spuIds){
+                //删除字段标1，逻辑删除
                 Spu spu = spuMapper.selectByPrimaryKey(id);
                 spu.setIsDelete("1");
+
+                //查询属于spu的sku的条件
+                Map map = new HashMap();
+                map.put("skuId",id);
+                List<Sku> skuList = skuService.findList(map);
+                //从价格缓存中删除价格信息
+                for(Sku sku: skuList){
+                    redisTemplate.boundHashOps(CacheKey.SKU_PRICE).delete(sku.getId());
+                }
                 int i = spuMapper.updateByPrimaryKeySelective(spu);
                 count+=i;
             }

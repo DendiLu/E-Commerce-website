@@ -25,7 +25,7 @@ public class IndexController {
         List<Ad> lbtList = adService.findByPosition("web_index_lb"); //首页的轮播图广告
         model.addAttribute("lbt",lbtList);
 
-        List<Map> categoryList = categoryService.finCategoryTree();  //首页分类导航
+        List<Map> categoryList = categoryService.findCategoryTree();  //首页分类导航
         model.addAttribute("categoryList",categoryList);
         return "index";
     }

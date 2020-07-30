@@ -8,6 +8,18 @@ import java.util.*;
  * ad业务逻辑层
  */
 public interface AdService {
+    /**
+     * 将position位置的广告存入缓存
+     * @param position
+     */
+    public void saveAdToRedisByPosition(String position);
+
+    /**
+     * 将所有广告存入缓存
+     */
+    public void saveAllAdToRedis();
+
+
     public List<Ad> findByPosition(String position);
 
 
