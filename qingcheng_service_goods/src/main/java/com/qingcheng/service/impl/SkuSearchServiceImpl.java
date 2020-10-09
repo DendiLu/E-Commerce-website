@@ -98,7 +98,6 @@ public class SkuSearchServiceImpl implements SkuSearchService {
 
         //1.封装查询请求
         SearchRequest searchRequest=new SearchRequest("sku");
-        searchRequest.types("doc"); //设置查询的类型
 
         SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
 
