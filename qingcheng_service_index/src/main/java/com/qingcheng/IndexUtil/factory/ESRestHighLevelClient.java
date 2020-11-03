@@ -1,4 +1,4 @@
-package com.qingcheng.service.factory;
+package com.qingcheng.IndexUtil.factory;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;

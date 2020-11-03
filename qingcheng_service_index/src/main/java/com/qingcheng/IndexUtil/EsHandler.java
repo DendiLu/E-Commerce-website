@@ -2,23 +2,30 @@ package com.qingcheng.IndexUtil;
 
 import com.qingcheng.pojo.goods.Sku;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Component
 public class EsHandler {
 
+    @Autowired
+    RestHighLevelClient client;
+
     public void insertIndex(List<Sku> skus) {
-        RestHighLevelClient client = getClient();
         BulkRequest bulkRequest = new BulkRequest();
 
         for (Sku sku : skus) {
@@ -58,16 +65,20 @@ public class EsHandler {
 
     }
 
-    public void deleteIndex() {
+    public void deleteIndex(String spu) {
 
+        DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest("sku");
+        deleteByQueryRequest.setQuery(new TermQueryBuilder("spu", spu));
+        try {
+            BulkByScrollResponse bulkByScrollResponse = client.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            List<BulkItemResponse.Failure> bulkFailures = bulkByScrollResponse.getBulkFailures();
+            for(BulkItemResponse.Failure f:bulkFailures){
+                System.out.println(f.getMessage());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private RestHighLevelClient getClient() {
-        HttpHost http = new HttpHost("127.0.0.1", 9200, "http");
 
-        RestClientBuilder builder = RestClient.builder(http);//rest构建器
-        RestHighLevelClient restHighLevelClient = new
-                RestHighLevelClient(builder);
-        return restHighLevelClient;
-    }
 }

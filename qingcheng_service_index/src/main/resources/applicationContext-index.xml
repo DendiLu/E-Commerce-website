@@ -6,17 +6,23 @@
                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 	<context:component-scan base-package="com.qingcheng"></context:component-scan>
 
-
-	<bean id="httpHost" class="org.apache.http.HttpHost">
+	<!--    es client-->
+	<bean id="restHighLevelClient" class="com.qingcheng.IndexUtil.factory.ESRestHighLevelClient" factory-method="getRestHighLevelClient">
 		<constructor-arg index="0" value="127.0.0.1"></constructor-arg>
 		<constructor-arg index="1" value="9200"></constructor-arg>
-		<constructor-arg index="2" value="http"></constructor-arg>
 	</bean>
-	<bean id="restClientBuilder" class="org.elasticsearch.client.RestClient" factory-method="builder">
-		<constructor-arg ref="httpHost"></constructor-arg>
-	</bean>
-	<bean id="restHighLevelClient" class="org.elasticsearch.client.RestHighLevelClient">
-		<constructor-arg ref="restClientBuilder"></constructor-arg>
-	</bean>
+
+<!--	<bean id="httpHost" class="org.apache.http.HttpHost">-->
+<!--		<constructor-arg name="hostname" value="127.0.0.1"></constructor-arg>-->
+<!--		<constructor-arg name="port" value="9200"></constructor-arg>-->
+<!--		<constructor-arg name="scheme" value="http"></constructor-arg>-->
+<!--	</bean>-->
+<!--	<bean id="restClientBuilder" class="org.elasticsearch.client.RestClient" factory-method="builder">-->
+<!--		<constructor-arg name="hosts" ref="httpHost"></constructor-arg>-->
+<!--	</bean>-->
+
+<!--	<bean id="restHighLevelClient" class="org.elasticsearch.client.RestHighLevelClient">-->
+<!--		<constructor-arg name="restClientBuilder" ref="restClientBuilder"></constructor-arg>-->
+<!--	</bean>-->
 
 </beans>
