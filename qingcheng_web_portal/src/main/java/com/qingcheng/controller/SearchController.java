@@ -1,6 +1,7 @@
 package com.qingcheng.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.qingcheng.service.goods.SkuSearchService;
 import com.qingcheng.util.WebUtil;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,8 @@ public class SearchController {
 
 
         Map result = skuSearchService.search2(searchMap);
+        String s = JSON.toJSONString(result);
+        System.out.println(s);
         model.addAttribute("result",result);
 
         //url处理

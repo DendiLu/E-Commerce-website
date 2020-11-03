@@ -11,6 +11,7 @@ import com.qingcheng.service.goods.SkuService;
 import com.qingcheng.service.goods.SpuService;
 import com.qingcheng.util.CacheKey;
 import com.qingcheng.util.IdWorker;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,12 @@ public class SpuServiceImpl implements SpuService {
     private GoodsLogMapper goodsLogMapper;
     @Autowired
     private SkuService skuService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+
+
 
     /**
      * 返回全部记录
@@ -194,6 +201,10 @@ public class SpuServiceImpl implements SpuService {
         if (count == 0) {
             categoryBrandMapper.insert(categoryBrand);
         }
+        Map<String, String> rabbit = new HashMap<>();
+        rabbit.put("create",spu.getId());
+        rabbitTemplate.convertAndSend("qingcheng.upshelf","",rabbit);
+
 
     }
 
@@ -262,6 +273,9 @@ public class SpuServiceImpl implements SpuService {
             goodsLog.setLogInfo(logInfo);
             goodsLogMapper.updateByPrimaryKeySelective(goodsLog);
         }
+        Map<String,String> rabbit = new HashMap<>();
+        rabbit.put("delete",spuId);
+        rabbitTemplate.convertAndSend("qingcheng.downshelf","",rabbit);
     }
 
 
@@ -294,6 +308,9 @@ public class SpuServiceImpl implements SpuService {
             goodsLog.setLogInfo(logInfo);
             goodsLogMapper.updateByPrimaryKeySelective(goodsLog);
         }
+        Map<String,String> rabbit = new HashMap<>();
+        rabbit.put("create",spu.getId());
+        rabbitTemplate.convertAndSend("qingcheng.upshelf","",rabbit);
 
     }
 

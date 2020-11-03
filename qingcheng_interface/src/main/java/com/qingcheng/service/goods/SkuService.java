@@ -13,6 +13,13 @@ public interface SkuService {
 
     public void savePriceToRedisById(String id,Integer price);
 
+    /**
+     * 根据商品sku查找其spu
+     * @param skuId
+     * @return
+     */
+    public String findSpuId(String skuId);
+
 
     public void deletePriceFromRedis(String skuId);
 

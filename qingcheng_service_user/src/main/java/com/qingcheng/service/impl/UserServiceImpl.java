@@ -1,29 +1,91 @@
 package com.qingcheng.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.UserMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.user.User;
 import com.qingcheng.service.user.UserService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Override
+    public void add(User user, String smsCode) {
+        //校验
+        String sysCode = (String) redisTemplate.boundValueOps("code_" + user.getPhone()).get();
+        if(sysCode==null)
+            throw new RuntimeException("验证码未发送或已过期");
+        System.out.println("syscode: "+sysCode+", smscode: "+smsCode);
+        if(!sysCode.equals(smsCode))
+            throw new RuntimeException("验证码不正确");
+        if (user.getUsername()==null)
+            user.setUsername(user.getPhone());
+        User search = new User();
+        search.setUsername(user.getUsername());
+        if(userMapper.selectCount(search)>0)
+            throw new RuntimeException("已被注册");
+
+        Date currentTime = new Date();
+        user.setCreated(currentTime);
+        user.setUpdated(currentTime);
+        user.setIsEmailCheck("0");
+        user.setIsMobileCheck("1");
+        user.setStatus("1");
+        user.setPoints(0);
+        System.out.println(user);
+        userMapper.insert(user);
+
+    }
+
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     /**
      * 返回全部记录
      * @return
      */
     public List<User> findAll() {
         return userMapper.selectAll();
+    }
+
+    /**
+     * 发送手机验证码
+     * @param phone  手机号
+     */
+    @Override
+    public void sendSms(String phone) {
+        //生成六位短信验证码
+        Random random = new Random();
+        int smsCode = random.nextInt(999999);
+        if(smsCode<100000)
+            smsCode+=100000;
+
+        redisTemplate.boundValueOps("code_"+phone).set(smsCode+"");
+        redisTemplate.boundValueOps("code_"+phone).expire(5, TimeUnit.MINUTES);
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("phone",phone);
+        map.put("code",smsCode+ "");
+
+        rabbitTemplate.convertAndSend("","queue.sms", JSON.toJSONString(map));
+        System.out.println(JSON.toJSONString(map)+"-------------");
+
+
+
     }
 
     /**

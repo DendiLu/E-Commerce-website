@@ -8,7 +8,18 @@ import java.util.*;
  * user业务逻辑层
  */
 public interface UserService {
+    /**
+     * 发送手机验证码
+     * @param phone  手机号
+     */
+    public void sendSms(String phone);
 
+    /**
+     * 用户注册
+     * @param user  用户信息
+     * @param smsCode  短信验证码
+     */
+    public void add(User user, String smsCode);
 
     public List<User> findAll();
 

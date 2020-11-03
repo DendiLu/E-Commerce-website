@@ -1,9 +1,15 @@
 package com.qingcheng.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.qingcheng.dao.BrandMapper;
+import com.qingcheng.dao.CategoryMapper;
 import com.qingcheng.dao.SpecMapper;
+import com.qingcheng.pojo.goods.*;
+import com.qingcheng.service.goods.CategoryService;
 import com.qingcheng.service.goods.SkuSearchService;
+import com.qingcheng.util.CacheKey;
 import org.apache.lucene.search.TotalHits;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -23,8 +29,9 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +41,8 @@ public class SkuSearchServiceImpl implements SkuSearchService {
     @Autowired
     RestHighLevelClient restHighLevelClient;
 
+    @Autowired
+    RedisTemplate redisTemplate;
 
     @Override
     public Map search(Map<String, String> searchMap) {
@@ -94,6 +103,21 @@ public class SkuSearchServiceImpl implements SkuSearchService {
 
     @Autowired
     SpecMapper specMapper;
+
+    @Autowired
+    CategoryMapper categoryMapper;
+
+
+    public void saveTablesToRedis(){
+        List<Spec> specs = specMapper.selectAll();
+        redisTemplate.boundValueOps(CacheKey.SPEC_LIST).set(specs);
+        List<Category> categories = categoryMapper.selectAll();
+        redisTemplate.boundValueOps(CacheKey.CATEGORY_LIST).set(categories);
+        List<Brand> brands = brandMapper.selectAll();
+        redisTemplate.boundValueOps(CacheKey.BRAND_LIST).set(brands);
+    }
+
+
     public Map search2(Map<String,String> searchMap) {
 
         //1.封装查询请求

@@ -18,11 +18,28 @@ import java.util.Map;
 @Service
 public class SkuServiceImpl implements SkuService {
 
+
     @Autowired
     private SkuMapper skuMapper;
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    /**
+     * 根据商品sku查找其spu
+     * @param skuId
+     * @return
+     */
+    @Override
+    public String findSpuId(String skuId) {
+        Sku sku = new Sku();
+        sku.setId(skuId);
+        List<Sku> select = skuMapper.select(sku);
+        if(select==null||select.size()==0)
+            return null;
+        sku = select.get(0);
+        return sku.getSpuId();
+    }
 
     @Override
     public void deletePriceFromRedis(String skuId) {
@@ -31,13 +48,14 @@ public class SkuServiceImpl implements SkuService {
 
     @Override
     public void savePriceToRedisById(String id, Integer price) {
-            redisTemplate.boundHashOps(CacheKey.SKU_PRICE).put(id,price);
+        redisTemplate.boundHashOps(CacheKey.SKU_PRICE).put(id, price);
     }
 
     @Override
     public Integer findPrice(String skuId) {
-        System.out.println("价格是："+(Integer)redisTemplate.boundHashOps(CacheKey.SKU_PRICE).get(skuId)+", sku:"+skuId);
-        return (Integer)redisTemplate.boundHashOps(CacheKey.SKU_PRICE).get(skuId);
+//        List<Sku> sku = (List<Sku>) redisTemplate.boundHashOps(CacheKey.SKU_PRICE).get("sku");   从redis中取出的数据量太大
+//        System.out.println("价格是：" + (Integer) redisTemplate.boundHashOps(CacheKey.SKU_PRICE).get(skuId) + ", sku:" + skuId);
+        return (Integer) redisTemplate.boundHashOps(CacheKey.SKU_PRICE).get(skuId);
     }
 
     @Override
@@ -47,10 +65,10 @@ public class SkuServiceImpl implements SkuService {
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo("status", "1");
             List<Sku> skus = skuMapper.selectByExample(example);
-            //****这样实现肯定有问题，无数次打开关闭和redis的连接并写入****
             for (Sku sku : skus) {
                 redisTemplate.boundHashOps(CacheKey.SKU_PRICE).put(sku.getId(), sku.getPrice());
             }
+
         }
     }
 

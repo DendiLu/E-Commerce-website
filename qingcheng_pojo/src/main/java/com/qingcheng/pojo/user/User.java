@@ -13,8 +13,31 @@ public class User implements Serializable{
 	@Id
 	private String username;//用户名
 
-
-	
+	@Override
+	public String toString() {
+		return "User{" +
+				"username='" + username + '\'' +
+				", password='" + password + '\'' +
+				", phone='" + phone + '\'' +
+				", email='" + email + '\'' +
+				", created=" + created +
+				", updated=" + updated +
+				", sourceType='" + sourceType + '\'' +
+				", nickName='" + nickName + '\'' +
+				", name='" + name + '\'' +
+				", status='" + status + '\'' +
+				", headPic='" + headPic + '\'' +
+				", qq='" + qq + '\'' +
+				", isMobileCheck='" + isMobileCheck + '\'' +
+				", isEmailCheck='" + isEmailCheck + '\'' +
+				", sex='" + sex + '\'' +
+				", userLevel=" + userLevel +
+				", points=" + points +
+				", experienceValue=" + experienceValue +
+				", birthday=" + birthday +
+				", lastLoginTime=" + lastLoginTime +
+				'}';
+	}
 
 	private String password;//密码，加密存储
 

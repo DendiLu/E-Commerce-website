@@ -36,6 +36,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             grantedAuthorityList.add(new SimpleGrantedAuthority(rs));
         }
         return new User(s,list.get(0).getPassword(),
-                grantedAuthorityList);
+                grantedAuthorityList);                  //将数据库查到的密码密文和输入的密文用bcrypt做匹配
+                                                        //成功则跳转到AuthenticationSuccessHandler
     }
 }
